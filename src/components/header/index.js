@@ -1,14 +1,38 @@
-import { View, Text, Pressable, TouchableOpacity} from 'react-native'
+import { View, Text, Pressable, TouchableOpacity, Modal} from 'react-native'
 import React, { useContext, useState } from 'react'
 import styles from "./style"
 import { AuthContext } from '../../contexts/auth'
 import Icon from 'react-native-vector-icons/AntDesign'
 import { TextInput } from 'react-native-paper'
 import { Searchbar } from 'react-native-paper';
+import { useRoute } from '@react-navigation/native';
 
 const Header = (props) => {
+  const state = useRoute();
+  //console.log(state.name);
   const {userToken} = useContext(AuthContext)
   const [show, setShow] = useState(false)
+  const handle = function(){
+    if(state.name == "destination")
+      props.reset()
+    props.navigation.navigate("destination")
+  }
+  const handle1 = function(){
+    if(state.name == "tour")
+      props.reset()
+    props.navigation.navigate("tour")
+  }
+  const directLink = function(){
+    if(userToken.account.role == "qtv"){
+      props.navigation.navigate("manageAccount")
+    }
+    else if(userToken.account.role == "ctv1"){
+      props.navigation.navigate("manageDestination")
+    }
+    else if(userToken.account.role == "ctv2"){
+      props.navigation.navigate("manageTour")
+    }
+  }
   return (
     <View>
       <View style={{flexDirection: "row"}}>
@@ -21,13 +45,13 @@ const Header = (props) => {
         </Pressable>
         <Pressable
             style={styles.des}
-            onPress={() => {props.navigation.navigate("destination")}}
+            onPress={handle}
         >
           <Text style={styles.textStyle}>Destination</Text>
         </Pressable>
         <Pressable
             style={styles.tour}
-            onPress={() => {props.navigation.navigate("tour")}}
+            onPress={handle1}
         >
           <Text style={styles.textStyle}>Tour</Text>
         </Pressable>
@@ -63,12 +87,16 @@ const Header = (props) => {
             >
               <Text style={{color: "orange", fontSize: 15, fontWeight: "bold", textAlign: "center"}}>Private Home</Text>
             </Pressable>
-            <Pressable
+            {
+            userToken.account.role == "tv" ? 
+            <></>
+            :<Pressable
               style={styles.show}
-              onPress={() => {props.navigation.navigate("destination")}}
+              onPress={directLink}
             >
               <Text style={{color: "orange", fontSize: 15, fontWeight: "bold", textAlign: "center"}}>Manage</Text>
             </Pressable> 
+            }
             </View>
             
         : <></>

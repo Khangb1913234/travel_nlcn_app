@@ -4,7 +4,7 @@ import React, {createContext, useEffect, useState} from 'react';
 
 export const AuthContext = createContext();
 
-const address = "http://10.3.55.106:5000"
+const address = "http://192.168.1.12:5000"
 export const AuthProvider = ({children}) => {
     
   const [userToken, setUserToken] = useState({})

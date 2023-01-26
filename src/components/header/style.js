@@ -35,6 +35,12 @@ const styles = StyleSheet.create({
         width: "15%",
         marginTop: 25,
     },
+    modal: {
+        backgroundColor: 'lightblue',
+        paddingVertical: 8,
+        width: "15%",
+        marginTop: 25,
+    },
     textStyle: {
         fontWeight: "bold", 
         paddingLeft: 10, 
