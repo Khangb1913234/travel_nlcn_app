@@ -1,17 +1,47 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
-import React, { useContext } from 'react'
+import { View, Text, StyleSheet, TouchableOpacity, Pressable } from 'react-native'
+import React, { useContext, useEffect, useState} from 'react'
 import { AuthContext } from '../contexts/auth'
 import Header from '../components/header'
+import axios from 'axios'
 
 const PrivateHome = ({navigation, route}) => {
     const {userToken, logout} = useContext(AuthContext)
+    const {address} = useContext(AuthContext)
+    const [collection, setCollection] = useState([])
+    const getInfo = function(){
+        axios.get(`${address}/destinations/favorite/${userToken.account._id}`, {
+            headers: {Authorization: `Bearer ${userToken.token}`},
+        })
+        .then(function(res){
+            setCollection(res.data.destinations)
+        })
+        .catch(function(err){
+            console.log("Err:", err)
+        })
+    }
+    useEffect(()=>{
+        getInfo()
+    }, [collection])
     return (
         <View style={{backgroundColor: "#fff", flex: 1}}>
             <Header navigation={navigation} route={route}/>
             <Text style={styles.title}>Private Home</Text>
             <View style={styles.body}>
-                <Text style={{fontSize: 15}}>Username: {userToken.account.username}</Text>
-                <Text style={{fontSize: 15}}>ID: {userToken.account._id}</Text>
+                <Text style={{fontSize: 15, fontWeight: "bold"}}>Username: {userToken.account.username}</Text>
+                <Text style={{fontSize: 15, fontWeight: "bold"}}>ID: {userToken.account._id}</Text>
+                {userToken.account.role == "tv" ?
+                <View style={{marginVertical: 15}}>
+                    <Text style={{fontSize: 15, fontWeight: "bold"}}>Favorite: </Text>
+                    {
+                        collection.map((item, index)=>{
+                            return <Pressable style={{marginTop: 10}} key={index} onPress={()=>{navigation.navigate("detailDes",  {_id: item._id})}}>
+                                        <Text style={{color: "orange", fontSize: 15, fontWeight: "bold"}}>{item.name}</Text>
+                                    </Pressable>
+                        })
+                    }
+                </View>
+                :<View></View>
+                }
                 <TouchableOpacity style={styles.btn} onPress={logout}>
                     <Text style={{textAlign: "center"}}>Log out</Text>
                 </TouchableOpacity>

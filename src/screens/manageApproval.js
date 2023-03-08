@@ -7,9 +7,10 @@ import Icon from 'react-native-vector-icons/FontAwesome'
 import Icon2 from 'react-native-vector-icons/AntDesign'
 import Checkbox from 'expo-checkbox';
 
-const address = "http://192.168.1.12:5000"
+// const address = "http://192.168.1.12:5000"
 const ManageApproval = ({navigation, route}) => {
     const {userToken} = useContext(AuthContext)
+    const {address} = useContext(AuthContext)
     const [approvals, setApprovals] = useState([])
     const [checked, setChecked] = useState([])
     const [isSelectedAll, setSelectionAll] = useState(false)

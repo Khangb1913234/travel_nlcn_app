@@ -7,9 +7,10 @@ import Icon from 'react-native-vector-icons/FontAwesome'
 import Icon2 from 'react-native-vector-icons/AntDesign'
 import Checkbox from 'expo-checkbox';
 
-const address = "http://192.168.1.12:5000"
+// const address = "http://192.168.1.12:5000"
 const ManageDestination = ({navigation, route}) => {
     const {userToken} = useContext(AuthContext)
+    const {address} = useContext(AuthContext)
     const [destinations, setDestinations] = useState([])
     const [checked, setChecked] = useState([])
     const [isSelectedAll, setSelectionAll] = useState(false)
@@ -148,7 +149,7 @@ const ManageDestination = ({navigation, route}) => {
             <Pressable style={{paddingVertical: 10, paddingHorizontal: 5}} onPress={deleteManyDestination}>
                 <Icon2 name="delete" size={18} style={{color: "orange"}}></Icon2>
             </Pressable>
-            <Pressable style={{paddingVertical: 10, paddingHorizontal: 5, backgroundColor: "#04B404", borderRadius: 5, width: 65, marginLeft: 170}} onPress={()=>navigation.navigate("add", {addStyle: "destinations"})}>
+            <Pressable style={{paddingVertical: 10, paddingHorizontal: 5, backgroundColor: "#04B404", borderRadius: 5, width: 65, marginLeft: 200}} onPress={()=>navigation.navigate("add", {addStyle: "destinations"})}>
                 <Text style={{color: "white", textAlign: "center"}}>Create</Text>
             </Pressable>
             </View>

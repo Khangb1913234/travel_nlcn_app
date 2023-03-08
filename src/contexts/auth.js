@@ -1,15 +1,19 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import React, {createContext, useEffect, useState} from 'react';
-
 export const AuthContext = createContext();
 
-const address = "http://192.168.1.12:5000"
+// const IP = "http://10.3.55.58:5000"
+const IP = "http://192.168.1.7:5000"
+// const IP = "http://192.168.2.53:5000"
+// const IP = "http://192.168.52.155:5000"
+
 export const AuthProvider = ({children}) => {
     
-  const [userToken, setUserToken] = useState({})
-  const [isLoading, setIsLoading] = useState(false)
-  const [message, setMessage]= useState("")
+    const [userToken, setUserToken] = useState({})
+    const [isLoading, setIsLoading] = useState(false)
+    const [message, setMessage]= useState("")
+    const [address, setAddress] = useState(IP)
 
     const register = function(email, username, password, navigation){    
         if(email.length == 0 || username.length == 0 || password.length == 0){
@@ -17,7 +21,7 @@ export const AuthProvider = ({children}) => {
             return false
         }
         setIsLoading(true)
-        axios.post(`${address}/account/register`, {
+        axios.post(`${IP}/account/register`, {
             email: email,
             username: username,
             password: password
@@ -42,7 +46,7 @@ export const AuthProvider = ({children}) => {
             return false
         }
         setIsLoading(true)
-        axios.post(`${address}/account/login`, {
+        axios.post(`${IP}/account/login`, {
             username: username,
             password: password
         })
@@ -84,22 +88,56 @@ export const AuthProvider = ({children}) => {
           userInfo = JSON.parse(userInfo);
     
           if(userInfo) {
+
             setUserToken(userInfo)
           }
     
         } catch (e) {
           console.log(`is logged in error ${e}`)
         }
-      }
+    }
+
+    const updateSymbol = function(){
+        axios.get(`${address}/account/detail`, {
+            headers: {Authorization: `Bearer ${userToken.token}`},
+        })
+        .then(function(res){
+            setUserToken(Object.assign(userToken, res.data))
+        })
+        .catch(function(err){
+            console.log("Err:", err)
+        })
+    }
+
+    // const update = function(){
+    //     if(Object.keys(userToken).length != 0){
+    //         axios.get(`${address}/account/detail`, {
+    //             headers: {Authorization: `Bearer ${userToken.token}`},
+    //         })
+    //         .then(function(res){
+    //             setUserToken(Object.assign(res.data, userToken))
+    //             // /console.log(Object.assign(res.data, userToken))
+    //         })
+    //         .catch(function(err){
+    //             console.log("Err:", err)
+    //         })
+    //     }
+    // }
+
+    
     
     useEffect(() => {
-    isLoggedIn();
+        isLoggedIn();
     }, [])
-    
+
+    // useEffect(() => {
+    //     update();
+    // }, [userToken])
+
 
   return (
     <AuthContext.Provider
-      value={{register, login, logout, userToken, isLoading, message}}>
+      value={{register, login, logout, updateSymbol, userToken, isLoading, message, address}}>
       {children}
     </AuthContext.Provider>
   );

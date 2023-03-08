@@ -7,9 +7,10 @@ import Icon from 'react-native-vector-icons/Ionicons'
 import Icon2 from 'react-native-vector-icons/AntDesign'
 import Checkbox from 'expo-checkbox';
 
-const address = "http://192.168.1.12:5000"
+// const address = "http://192.168.1.12:5000"
 const ManageUnApproval = ({navigation, route}) => {
     const {userToken} = useContext(AuthContext)
+    const {address} = useContext(AuthContext)
     const [unapprovals, setUnApprovals] = useState([])
     var findAllUnApproval
     if(route.params.locate == "destinations"){

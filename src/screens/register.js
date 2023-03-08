@@ -16,7 +16,7 @@ const Register = ({navigation, route}) => {
         <Header navigation={navigation} route={route}/>
         <View style={styles.container}>
             <Spinner visible={isLoading} />
-            <Text style={{flex: 0.45, fontSize: 35, color: "orange"}}>Sign up</Text>
+            <Text style={{fontSize: 35, color: "orange", marginBottom: 20}}>SIGN UP</Text>
             <View style={styles.inputView}>
                 <TextInput
                     style={styles.TextInput}
@@ -51,7 +51,7 @@ const Register = ({navigation, route}) => {
             <View style={{marginTop: 50, flexDirection: "row"}}>
                 <Text style={{marginRight: 10, fontSize: 15}}>Already have an account ? </Text>
                 <TouchableOpacity style={{}} onPress={()=>navigation.navigate("login")}>
-                    <Text style={{color: "orange", fontSize: 15}}>Login</Text> 
+                    <Text style={{color: "orange", fontSize: 15}}>Sign in</Text> 
                 </TouchableOpacity>
             </View>
         </View>

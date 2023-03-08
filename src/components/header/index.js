@@ -39,7 +39,7 @@ const Header = (props) => {
         <Pressable
             style={styles.nav}
             title="Main page"
-            onPress={() => {props.navigation.navigate("destination")}}
+            onPress={() => {props.navigation.navigate("home")}}
         >
           <Text style={styles.textStyle}>Ktravel</Text>
         </Pressable>
@@ -70,7 +70,7 @@ const Header = (props) => {
                 style={styles.show}
                 onPress={() => {setShow(false); props.navigation.navigate("login")}}
             >
-              <Text style={{color: "orange", fontSize: 15, fontWeight: "bold", textAlign: "center"}}>Login</Text>
+              <Text style={{color: "orange", fontSize: 15, fontWeight: "bold", textAlign: "center"}}>Sign in</Text>
             </Pressable> 
             <Pressable
                 style={styles.show}

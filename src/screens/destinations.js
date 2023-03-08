@@ -11,9 +11,16 @@ import { Searchbar } from 'react-native-paper';
 import { Dropdown } from 'react-native-element-dropdown';
 import Checkbox from 'expo-checkbox';
 
-const address = "http://192.168.1.12:5000"
+// const address = "http://192.168.1.12:5000"
 const Destinations = ({navigation, route}) => {
+    // if(route._id){
+    //     console.log("Co id")
+    // }
+    // else{
+    //     console.log("Ko co id")
+    // }
     const {userToken} = useContext(AuthContext)
+    const {address} = useContext(AuthContext)
     const [destinations, setDestiantions] = useState([])
     const [filterDestinations, setFilterDestinations] = useState([])
     const [search, setSearch] = useState("")
@@ -41,6 +48,10 @@ const Destinations = ({navigation, route}) => {
             var arr2 = []
             var arr3 = []
             for(var i = 0; i < res.data.destinations.length; i++){
+                if(res.data.destinations[i].image.indexOf(",") != -1)
+                    res.data.destinations[i].image = res.data.destinations[i].image.slice(0, res.data.destinations[i].image.indexOf(","))
+                if(res.data.destinations[i].point == "NaN")
+                    res.data.destinations[i].point = "-"
                 arr1.push(res.data.destinations[i])
             }
             for(var i = 0; i < res.data.types.length; i++){
@@ -54,7 +65,7 @@ const Destinations = ({navigation, route}) => {
             setServices(arr3)
           })
           .catch(function(err){
-            console.log("Err:", err)
+            console.log("Err1:", err)
           })
     }
     const searchDestination = function(search){
@@ -66,12 +77,16 @@ const Destinations = ({navigation, route}) => {
             .then(function(res){
                 var arr = []
                 for(var i = 0; i < res.data.destinations.length; i++){
+                    if(res.data.destinations[i].image.indexOf(",") != -1)
+                        res.data.destinations[i].image = res.data.destinations[i].image.slice(0, res.data.destinations[i].image.indexOf(","))
+                    if(res.data.destinations[i].point == "NaN")
+                        res.data.destinations[i].point = "-"
                     arr.push(res.data.destinations[i])
                 }
                 setDestiantions(arr)
             })
             .catch(function(err){
-                console.log("Err:", err)
+                console.log("Err2:", err)
             })
         }
         else{
@@ -89,7 +104,7 @@ const Destinations = ({navigation, route}) => {
             setDistrict(arr)
           })
           .catch(function(err){
-            console.log("Err:", err)
+            console.log("Err3:", err)
           })
     }
 
@@ -145,16 +160,43 @@ const Destinations = ({navigation, route}) => {
 
             var arr = []
             for(var i = 0; i < res.data.destinations.length; i++){
+                if(res.data.destinations[i].image.indexOf(",") != -1)
+                    res.data.destinations[i].image = res.data.destinations[i].image.slice(0, res.data.destinations[i].image.indexOf(","))
+                if(res.data.destinations[i].point == "NaN")
+                    res.data.destinations[i].point = "-"
                 arr.push(res.data.destinations[i])
             }
             setFilterDestinations(arr)
         })
         .catch(function(err){
-            console.log("Err:", err)
+            console.log("Err4:", err)
         })
 
         setModalVisible(!modalVisible)
     }
+
+    const filterLinkType = function(id){       
+        axios.get(`${address}/destinations/filter/0/0/${id}/0`, {
+            headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
+        })
+        .then(function(res){
+    
+            var arr = []
+            for(var i = 0; i < res.data.destinations.length; i++){
+                if(res.data.destinations[i].image.indexOf(",") != -1)
+                    res.data.destinations[i].image = res.data.destinations[i].image.slice(0, res.data.destinations[i].image.indexOf(","))
+                if(res.data.destinations[i].point == "NaN")
+                    res.data.destinations[i].point = "-"
+                arr.push(res.data.destinations[i])
+            }
+            setFilterDestinations(arr)
+        })
+        .catch(function(err){
+            console.log("Err5:", err)
+        })
+    
+        setModalVisible(!modalVisible)
+      }
 
     const handleChange = (id) => {
         const clickedCategory = checked.indexOf(id)
@@ -230,7 +272,7 @@ const Destinations = ({navigation, route}) => {
                                     <Image style={{width: "100%", height: "65%"}} source={{uri: `${address}${item.image}`}}/>
                                     <View style={{flexDirection: "row", padding: 5}}>                                    
                                         <View style={styles.point}>
-                                            <Text style={{textAlign: "center", color: "white", marginTop: 10}}>3.5</Text>                       
+                                            <Text style={{textAlign: "center", color: "white", marginTop: 10}}>{item.point}</Text>                       
                                         </View>
                                         <Text style={styles.paragraph}>{item.name}</Text>
                                     </View>
@@ -249,7 +291,7 @@ const Destinations = ({navigation, route}) => {
                                     <Image style={{width: "100%", height: "65%"}} source={{uri: `${address}${item.image}`}}/>
                                     <View style={{flexDirection: "row", padding: 5}}>                                    
                                         <View style={styles.point}>
-                                            <Text style={{textAlign: "center", color: "white", marginTop: 10}}>3.5</Text>                       
+                                            <Text style={{textAlign: "center", color: "white", marginTop: 10}}>{item.point}</Text>                       
                                         </View>
                                         <Text style={styles.paragraph}>{item.name}</Text>
                                     </View>
@@ -327,7 +369,7 @@ const Destinations = ({navigation, route}) => {
                             />
                             </View>
                         </View>
-                        <Text style={{margin: 5, fontSize: 15}}>Select types: </Text>
+                        <Text style={{marginHorizontal: 5, marginVertical: 10, fontSize: 18, fontWeight: "bold"}}>Select types: </Text>
                         <View style={{flexDirection: "row", flexWrap: 'wrap'}}>
                             
                             {
@@ -344,7 +386,7 @@ const Destinations = ({navigation, route}) => {
                                 })
                             }
                         </View>
-                        <Text style={{margin: 5, fontSize: 15}}>Select services: </Text>
+                        <Text style={{marginHorizontal: 5, marginVertical: 10, fontSize: 18, fontWeight: "bold"}}>Select services: </Text>
                         <View style={{flexDirection: "row", flexWrap: 'wrap'}}>
                             
                             {
@@ -362,7 +404,7 @@ const Destinations = ({navigation, route}) => {
                             }
                         </View>
                         <Pressable style={styles.button} onPress={filterDestination}>
-                            <Text>Filter</Text>
+                            <Text style={{color: "white", textAlign: "center"}}>Filter</Text>
                         </Pressable>
                     </View>
                 </View>
@@ -445,11 +487,14 @@ const styles = StyleSheet.create({
         height: 500
     },
     button: {
-        borderRadius: 20,
-        padding: 10,
-        elevation: 2,
-        width: "20%",
-        alignSelf: "flex-end",
+        width: "20%", 
+        backgroundColor: "green", 
+        borderRadius: 5,  
+        alignSelf: "flex-end", 
+        paddingHorizontal: 5, 
+        paddingVertical: 10, 
+        marginRight: 5,
+        marginTop: 10
     },
     buttonOpen: {
         backgroundColor: '#F194FF',

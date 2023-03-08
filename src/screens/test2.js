@@ -1,196 +1,67 @@
-// Example of File Picker in React Native
-// https://aboutreact.com/file-picker-in-react-native/
+import React, { useState, useEffect, useContext } from 'react';
+import { Text, Button, Image, View, Platform, Pressable } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import axios from 'axios';
+import { AuthContext } from '../contexts/auth';
 
-// Import React
-import React, {useState} from 'react';
-// Import required components
-import {
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  ScrollView,
-  Image,
-} from 'react-native';
+// const address = "http://10.3.55.101:5000"
+export default function Test2() {
+  const {userToken} = useContext(AuthContext)
+  const {address} = useContext(AuthContext)
+  const [image, setImage] = useState([]);
 
-// Import Document Picker
-import DocumentPicker from 'react-native-document-picker';
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      //allowsEditing: true,
+      aspect: [4, 6],
+      quality: 1,
+      allowsMultipleSelection: true
+    });
 
-const App = () => {
-  const [singleFile, setSingleFile] = useState('');
-  const [multipleFile, setMultipleFile] = useState([]);
+    //console.log(result);
 
-  const selectOneFile = async () => {
-    //Opening Document Picker for selection of one file
-    try {
-      const res = await DocumentPicker.pick({
-        type: [DocumentPicker.types.allFiles],
-        //There can me more options as well
-        // DocumentPicker.types.allFiles
-        // DocumentPicker.types.images
-        // DocumentPicker.types.plainText
-        // DocumentPicker.types.audio
-        // DocumentPicker.types.pdf
-      });
-      //Printing the log realted to the file
-      console.log('res : ' + JSON.stringify(res));
-      console.log('URI : ' + res.uri);
-      console.log('Type : ' + res.type);
-      console.log('File Name : ' + res.name);
-      console.log('File Size : ' + res.size);
-      // Setting the state to show single file attributes
-      setSingleFile(res);
-    } catch (err) {
-      //Handling any exception (If any)
-      if (DocumentPicker.isCancel(err)) {
-        //If user canceled the document selection
-        alert('Canceled from single doc picker');
-      } else {
-        //For Unknown Error
-        alert('Unknown Error: ' + JSON.stringify(err));
-        console.log('Unknown Error: ' + JSON.stringify(err));
-        throw err;
+    if (!result.canceled) {
+      var arr = []
+      var random =  Math.floor(Math.random() * 1000)
+      for(var i = 0; i < Object.keys(result.assets).length; i++){
+          var temp = {
+            uri: result.assets[i].uri,
+            name: 'SomeImageName' + i + random + ".jpg",
+            type: 'image/jpg',
+          }
+          arr.push(temp)
       }
+      setImage(arr)
     }
   };
 
-  const selectMultipleFile = async () => {
-    //Opening Document Picker for selection of multiple file
+
+  async function upload() {
     try {
-      const results = await DocumentPicker.pickMultiple({
-        type: [DocumentPicker.types.images],
-        //There can me more options as well find above
+      const data = new FormData();
+      for(var i = 0; i < image.length; i++)
+        data.append("image", image[i]);
+      data.append("name", "abc")
+      console.log(data)
+      await fetch(`${address}/destinations/upload/image`, {
+        method: "POST",
+        body: data,
       });
-      for (const res of results) {
-        //Printing the log realted to the file
-        console.log('res : ' + JSON.stringify(res));
-        console.log('URI : ' + res.uri);
-        console.log('Type : ' + res.type);
-        console.log('File Name : ' + res.name);
-        console.log('File Size : ' + res.size);
-      }
-      //Setting the state to show multiple file attributes
-      setMultipleFile(results);
-    } catch (err) {
-      //Handling any exception (If any)
-      if (DocumentPicker.isCancel(err)) {
-        //If user canceled the document selection
-        alert('Canceled from multiple doc picker');
-      } else {
-        //For Unknown Error
-        alert('Unknown Error: ' + JSON.stringify(err));
-        throw err;
-      }
+    } catch (error) {
+      console.log(error);
     }
-  };
+  }
 
   return (
-    <SafeAreaView style={{flex: 1}}>
-      <Text style={styles.titleText}>
-        Example of File Picker in React Native
-      </Text>
-      <View style={styles.container}>
-        {/*To show single file attribute*/}
-        <TouchableOpacity
-          activeOpacity={0.5}
-          style={styles.buttonStyle}
-          onPress={selectOneFile}>
-          {/*Single file selection button*/}
-          <Text style={{marginRight: 10, fontSize: 19}}>
-            Click here to pick one file
-          </Text>
-          <Image
-            source={{
-              uri: 'https://img.icons8.com/offices/40/000000/attach.png',
-            }}
-            style={styles.imageIconStyle}
-          />
-        </TouchableOpacity>
-        {/*Showing the data of selected Single file*/}
-        <Text style={styles.textStyle}>
-          File Name: {singleFile.name ? singleFile.name : ''}
-          {'\n'}
-          Type: {singleFile.type ? singleFile.type : ''}
-          {'\n'}
-          File Size: {singleFile.size ? singleFile.size : ''}
-          {'\n'}
-          URI: {singleFile.uri ? singleFile.uri : ''}
-          {'\n'}
-        </Text>
-        <View
-          style={{
-            backgroundColor: 'grey',
-            height: 2,
-            margin: 10
-          }} />
-        {/*To multiple single file attribute*/}
-        <TouchableOpacity
-          activeOpacity={0.5}
-          style={styles.buttonStyle}
-          onPress={selectMultipleFile}>
-          {/*Multiple files selection button*/}
-          <Text style={{marginRight: 10, fontSize: 19}}>
-            Click here to pick multiple files
-          </Text>
-          <Image
-            source={{
-              uri: 'https://img.icons8.com/offices/40/000000/attach.png',
-            }}
-            style={styles.imageIconStyle}
-          />
-        </TouchableOpacity>
-        <ScrollView>
-          {/*Showing the data of selected Multiple files*/}
-          {multipleFile.map((item, key) => (
-            <View key={key}>
-              <Text style={styles.textStyle}>
-                File Name: {item.name ? item.name : ''}
-                {'\n'}
-                Type: {item.type ? item.type : ''}
-                {'\n'}
-                File Size: {item.size ? item.size : ''}
-                {'\n'}
-                URI: {item.uri ? item.uri : ''}
-                {'\n'}
-              </Text>
-            </View>
-          ))}
-        </ScrollView>
-      </View>
-    </SafeAreaView>
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <Button title="Pick an image from camera roll" onPress={pickImage} />
+      {/* {image && <Image source={{ uri: image[0].uri }} style={{ width: 400, height: 300 }} />}
+      {image && <Image source={{ uri: image[1].uri }} style={{ width: 400, height: 300 }} />} */}
+      <Pressable onPress={upload}>
+        <Text>Upload</Text>
+      </Pressable>
+    </View>
   );
-};
-
-export default App;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    padding: 16,
-  },
-  titleText: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    paddingVertical: 20,
-  },
-  textStyle: {
-    backgroundColor: '#fff',
-    fontSize: 15,
-    marginTop: 16,
-    color: 'black',
-  },
-  buttonStyle: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    backgroundColor: '#DDDDDD',
-    padding: 5,
-  },
-  imageIconStyle: {
-    height: 20,
-    width: 20,
-    resizeMode: 'stretch',
-  },
-});
+}

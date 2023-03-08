@@ -5,12 +5,14 @@ import axios from 'axios';
 import { AuthContext } from '../contexts/auth';
 import Spinner from 'react-native-loading-spinner-overlay/lib';
 import Header from '../components/header'
+import Icon from 'react-native-vector-icons/Entypo'
 
 
 const Login = ({navigation, route}) => {
     const {login, isLoading, message} = useContext(AuthContext)
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
+    const [showPassword, setShowPassword] = useState(false);
     
     return (
         <>
@@ -19,7 +21,7 @@ const Login = ({navigation, route}) => {
         <View style={styles.container}>
             <Spinner visible={isLoading}/>
             
-            <Text style={{flex: 0.45, fontSize: 35, color: "orange"}}>Login</Text>
+            <Text style={{ fontSize: 35, color: "orange", marginBottom: 20}}>SIGN IN</Text>
             <View style={styles.inputView}>
                 <TextInput
                     style={styles.TextInput}
@@ -33,15 +35,18 @@ const Login = ({navigation, route}) => {
                     style={styles.TextInput}
                     placeholder="Password..."
                     placeholderTextColor="#003f5c"
-                    secureTextEntry={true}
+                    secureTextEntry={!showPassword}
                     onChangeText={(password) => setPassword(password)}
                 /> 
+                <TouchableOpacity onPress={()=>{setShowPassword(!showPassword);}} style={{marginRight: 5}}>
+                    <Text>{showPassword ? <Icon name="eye" size={20}></Icon> :  <Icon name="eye-with-line" size={15}></Icon>}</Text>
+                </TouchableOpacity>
             </View>
             <TouchableOpacity 
                 style={styles.loginBtn} 
                 onPress={()=>{login(username, password, navigation)}}
             >
-                <Text style={styles.loginText}>LOGIN</Text> 
+                <Text style={styles.loginText}>SIGN IN</Text> 
             </TouchableOpacity>
             <Text style={{marginTop: 20, color: "red"}}>{message}</Text>
             <View style={{marginTop: 20, flexDirection: "row"}}>  
@@ -69,6 +74,7 @@ const styles = StyleSheet.create({
         height: 45,
         marginBottom: 20,
         alignItems: "center",
+        flexDirection: "row"
     },
     TextInput: {
         height: 50,

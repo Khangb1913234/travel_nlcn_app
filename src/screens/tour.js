@@ -9,9 +9,10 @@ import Icon from 'react-native-vector-icons/FontAwesome'
 import { Dropdown } from 'react-native-element-dropdown';
 import Checkbox from 'expo-checkbox';
 
-const address = "http://192.168.1.12:5000"
+// const address = "http://192.168.1.12:5000"
 const Tours = ({navigation, route}) => {
     const {userToken} = useContext(AuthContext)
+    const {address} = useContext(AuthContext)
     const [tours, setTours] = useState([])
 
     const [filterTours, setFilterTours] = useState([])
@@ -44,7 +45,12 @@ const Tours = ({navigation, route}) => {
         })
           .then(function(res){
             var arr = []
+            var tempPrice
             for(var i = 0; i < res.data.tours.length; i++){
+                tempPrice = res.data.tours[i].price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                res.data.tours[i].price = tempPrice
+                if(res.data.tours[i].image.indexOf(",") != -1)
+                    res.data.tours[i].image = res.data.tours[i].image.slice(0, res.data.tours[i].image.indexOf(","))
                 arr.push(res.data.tours[i])
             }
             setTours(arr)
@@ -62,7 +68,10 @@ const Tours = ({navigation, route}) => {
             })
             .then(function(res){
                 var arr = []
+                var tempPrice1
                 for(var i = 0; i < res.data.tours.length; i++){
+                    tempPrice1 = res.data.tours[i].price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                    res.data.tours[i].price = tempPrice1
                     arr.push(res.data.tours[i])
                 }
                 setTours(arr)
@@ -130,9 +139,11 @@ const Tours = ({navigation, route}) => {
             headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
         })
         .then(function(res){
-
+            var tempPrice2
             var arr = []
             for(var i = 0; i < res.data.tours.length; i++){
+                tempPrice2 = res.data.tours[i].price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                res.data.tours[i].price = tempPrice2
                 arr.push(res.data.tours[i])
             }
             setFilterTours(arr)
@@ -239,7 +250,7 @@ const Tours = ({navigation, route}) => {
                         onPress={closeModal}>
                             <Text style={styles.textStyle}>X</Text>
                         </Pressable>
-                        <Text style={{margin: 5, fontSize: 15}}>Select destinations: </Text>
+                        <Text style={{marginHorizontal: 5, marginVertical: 10, fontSize: 18, fontWeight: "bold"}}>Select destinations: </Text>
                         <View style={{flexDirection: "row", flexWrap: 'wrap'}}>
                             
                             {
@@ -256,7 +267,7 @@ const Tours = ({navigation, route}) => {
                                 })
                             }
                         </View>
-                        <Text style={{margin: 5, fontSize: 15}}>Select price: </Text>
+                        <Text style={{marginHorizontal: 5, marginVertical: 10, fontSize: 18, fontWeight: "bold"}}>Select price: </Text>
                         <View style={{flexDirection: "row", flexWrap: 'wrap'}}>
                             {
                                 prices.map((item, index)=>{
@@ -273,7 +284,7 @@ const Tours = ({navigation, route}) => {
                             }
                         </View>
                         <Pressable style={styles.button} onPress={filterTour}>
-                            <Text>Filter</Text>
+                            <Text style={{color: "white", textAlign: "center"}}>Filter</Text>
                         </Pressable>
                     </View>
                 </View>
@@ -342,11 +353,14 @@ const styles = StyleSheet.create({
         height: 500
     },
     button: {
-        borderRadius: 20,
-        padding: 10,
-        elevation: 2,
-        width: "20%",
-        alignSelf: "flex-end",
+        width: "20%", 
+        backgroundColor: "green", 
+        borderRadius: 5,  
+        alignSelf: "flex-end", 
+        paddingHorizontal: 5, 
+        paddingVertical: 10, 
+        marginRight: 5,
+        marginTop: 10
     },
     buttonOpen: {
         backgroundColor: '#F194FF',

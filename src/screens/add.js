@@ -5,12 +5,20 @@ import axios from 'axios'
 import { AuthContext } from '../contexts/auth'
 import { Dropdown } from 'react-native-element-dropdown';
 import Checkbox from 'expo-checkbox';
+import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
+import { Linking } from 'react-native';
 
-const address = "http://192.168.1.12:5000"
+// const address = "http://192.168.1.12:5000"
 const Add = ({navigation, route}) => {
     const {userToken} = useContext(AuthContext)
+    const {address} = useContext(AuthContext)
     const [value, setValue] = useState("")
     const [page, setPage] = useState(route.params.addStyle)
+    const [fileType, setFileType] = useState(null)
+    const [fileService, setFileService] = useState(null)
+    const [fileDes, setFileDes] = useState(null)
+    const [fileTour, setFileTour] = useState(null)
 
     if(page == "destinations"){
         var [name, setName] = useState("")
@@ -21,18 +29,19 @@ const Add = ({navigation, route}) => {
         var [capacity, setCapacity] = useState("")
         var [contact, setContact] = useState("")
         var [map, setMap] = useState("")
-        var [image, setImage] = useState("")
         var [types, setTypes] = useState([])
         var [checked, setChecked] = useState([])
         var [services, setServices] = useState([])
         var [checked1, setChecked1] = useState([])
-
+        var [image, setImage] = useState([])
         var [district, setDistrict] = useState([])
         var [ward, setWard] = useState([])
         var [value1, setValue1] = useState(null)
         var [value2, setValue2] = useState(null)
         var [isFocus1, setIsFocus1] = useState(false)
         var [isFocus2, setIsFocus2] = useState(false)
+
+        var [number, setNumber] = useState(0)
 
         const findAllType = function(){
             axios.get(`${address}/me/stored/types`, {
@@ -144,9 +153,10 @@ const Add = ({navigation, route}) => {
         var [time, setTime] = useState("")
         var [price, setPrice] = useState("")
         var [contact, setContact] = useState("")
-        var [image, setImage] = useState("")
+        var [image, setImage] = useState([])
         var [destinations, setDestinations] = useState([])
         var [checked, setChecked] = useState([])
+        var [number, setNumber] = useState(0)
 
         const findAllDestination = function(){
             axios.get(`${address}/destinations/all`, {
@@ -187,80 +197,212 @@ const Add = ({navigation, route}) => {
             findAllDestination()
         }, [])
     }
+    
+    const pickImage = async () => {
+        // No permissions request is necessary for launching the image library
+        let result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.All,
+          //allowsEditing: true,
+          aspect: [4, 6],
+          quality: 1,
+          allowsMultipleSelection: true
+        });
+    
+        //console.log(result);
+    
+        if (!result.canceled) {
+          var arr = []
+          var random =  Math.floor(Math.random() * 1000)
+          for(var i = 0; i < Object.keys(result.assets).length; i++){
+              var temp = {
+                uri: result.assets[i].uri,
+                name: 'SomeImageName' + i + random + ".jpg",
+                type: 'image/jpg',
+              }
+              arr.push(temp)
+          }
+          setImage(arr)
+          setNumber(arr.length)
+        }
+    };
 
+    const pickFile = async () => {
+        let result = await DocumentPicker.getDocumentAsync({ type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        
+        if (result.type === 'success') {
+            console.log(
+                `URI: ${result.uri}\n` +
+                `Type: ${result.type}\n` +
+                `Name: ${result.name}\n` +
+                `Size: ${result.size}\n`
+            );
+            if(route.params.addStyle == "types")
+                setFileType(result)
+            else if(route.params.addStyle == "services")
+                setFileService(result)
+            else if(route.params.addStyle == "destinations")
+                setFileDes(result)
+            else if(route.params.addStyle == "tours")
+                setFileTour(result)
+        } 
+        else if (result.type === 'cancel') {
+            console.log('User cancelled the file picker.');
+        }
+    };
+
+    const createDes = async function(){
+        try {
+            console.log(image)
+            const data = new FormData();
+            for(var i = 0; i < image.length; i++)
+              data.append("image", image[i]);
+            data.append("name", name)
+            data.append("content", content)
+            data.append("address", address1)
+            data.append("districtId", value1)
+            data.append("wardCode", value2)
+            data.append("operatingTime", operatingTime)
+            data.append("contact", contact)
+            data.append("price", price)
+            data.append("capacity", capacity)
+            data.append("map", map)
+            data.append("types", checked)
+            data.append("services", checked1)
+            await fetch(`${address}/destinations/create`, {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${userToken.token}`,
+              },
+              body: data,
+            });
+            navigation.navigate("manageDestination")
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    const createTour = async function(){
+        try {
+            console.log(image)
+            const data = new FormData();
+            for(var i = 0; i < image.length; i++)
+              data.append("image", image[i]);
+            data.append("title", title)
+            data.append("content", content)
+            data.append("time", time)
+            data.append("contact", contact)
+            data.append("price", price)
+            data.append("destinations", checked)
+            await fetch(`${address}/tours/create`, {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${userToken.token}`,
+              },
+              body: data,
+            });
+            navigation.navigate("manageTour")
+        } catch (error) {
+            console.log(error);
+        }
+    }
     const create = function(){
-        if(value.length == 0 && page != "destinations" && page != "tours"){
+        if(value.length == 0){
             alert("Please enter...")
             return false
         }
-        if(page != "destinations" && page != "tours"){
-            axios.post(`${address}/${route.params.addStyle}/create`, {
-                name: value.trim()
-            }, {
-                headers: {Authorization: `Bearer ${userToken.token}`},
+        axios.post(`${address}/${route.params.addStyle}/create`, {
+            name: value.trim()
+        }, {
+            headers: {Authorization: `Bearer ${userToken.token}`},
+        })
+            .then(function(res){
+                //console.log(res.data.msg)
+                if(route.params.addStyle == "types")
+                    navigation.navigate("manageType")
+                else if(route.params.addStyle == "services")
+                    navigation.navigate("manageService")
             })
-                .then(function(res){
-                    //console.log(res.data.msg)
-                    if(route.params.addStyle == "types")
-                        navigation.navigate("manageType")
-                    else if(route.params.addStyle == "services")
-                        navigation.navigate("manageService")
-                })
-                .catch(function(err){
-                    console.log("Err:", err)
-            })
-            setValue("")
-            Keyboard.dismiss()
-        }
-        else if(page == "destinations"){
-            axios.post(`${address}/destinations/create`, {
-                name: name, 
-                content: content, 
-                address: address1,
-                districtId: value1,
-                wardCode: value2,
-                operatingTime: operatingTime,
-                contact: contact,
-                price: price,
-                capacity: capacity,
-                map: map,
-                types: checked,
-                services: checked1,
-                image: image
-            }, {
-                headers: {Authorization: `Bearer ${userToken.token}`},
-            })
-                .then(function(res){
-                    navigation.navigate("manageDestination")
-                })
-                .catch(function(err){
-                    console.log("Err:", err)
-            })
-            setValue("")
-            Keyboard.dismiss()
-        }
-        else if(page == "tours"){
-            axios.post(`${address}/tours/create`, {
-                title: title, 
-                content: content, 
-                time: time,
-                contact: contact,
-                price: price,
-                image: image,
-                destinations: checked,
-            }, {
-                headers: {Authorization: `Bearer ${userToken.token}`},
-            })
-                .then(function(res){
-                    navigation.navigate("manageTour")
-                })
-                .catch(function(err){
-                    console.log("Err:", err)
-            })
-            setValue("")
-            Keyboard.dismiss()
-        }
+            .catch(function(err){
+                console.log("Err:", err)
+        })
+        setValue("")
+        Keyboard.dismiss()
     }
+    const createWithFile = async () => {
+        if(route.params.addStyle == "types"){
+            const formData = new FormData();
+            formData.append('file', {
+            uri: fileType.uri,
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            name: fileType.name,
+            });
+        
+            const response = await fetch(`${address}/types/create`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${userToken.token}`,
+            },
+            body: formData,
+            });
+        
+            navigation.navigate("manageType")
+        }
+        else if(route.params.addStyle == "services"){
+            const formData = new FormData();
+            formData.append('file', {
+            uri: fileService.uri,
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            name: fileService.name,
+            });
+        
+            const response = await fetch(`${address}/services/create`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${userToken.token}`,
+            },
+            body: formData,
+            });
+        
+            navigation.navigate("manageService")
+        }
+        else if(route.params.addStyle == "destinations"){
+            const formData = new FormData();
+            formData.append('file', {
+            uri: fileDes.uri,
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            name: fileDes.name,
+            });
+            formData.append("excel", "yes")
+        
+            const response = await fetch(`${address}/destinations/create/excel`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${userToken.token}`,
+            },
+            body: formData,
+            });
+        
+            navigation.navigate("manageDestination")
+        }
+        else if(route.params.addStyle == "tours"){
+            const formData = new FormData();
+            formData.append('file', {
+            uri: fileTour.uri,
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            name: fileTour.name,
+            });
+            formData.append("excel", "yes")
+        
+            const response = await fetch(`${address}/tours/create/excel`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${userToken.token}`,
+            },
+            body: formData,
+            });
+        
+            navigation.navigate("manageTour")
+        }
+    };
     return (
         
         <View style={{alignItems: "center", backgroundColor: "#fff", flex: 1}}>
@@ -268,24 +410,41 @@ const Add = ({navigation, route}) => {
             {
             page == "types" ? 
                 <View>
-                <View style={{margin: 10}}>
-                    <Text style={{fontSize: 20, fontWeight: "bold", textAlign: "center"}}>Create Type</Text>
-                </View>
-                <View style={{paddingHorizontal: 10}}>
-                    <Text style={{marginBottom: 10}}>Name</Text>
-                    <TextInput
-                        value={value} 
-                        placeholder='Enter...' 
-                        style={styles.input}
-                        onChangeText = {(text) => setValue(text)}
-                    >
-                    </TextInput>
-                    <View style={{alignItems: 'flex-end'}}>
-                    <Pressable onPress={create} style={styles.btn}>
-                        <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
-                    </Pressable>
+                    <View style={{margin: 10}}>
+                        <Text style={{fontSize: 20, fontWeight: "bold", textAlign: "center"}}>Create Type</Text>
                     </View>
-                </View>
+                    <View style={{paddingHorizontal: 10}}>
+                        <Text style={{marginBottom: 10, fontSize: 15, fontWeight: "bold"}}>Name</Text>
+                        <TextInput
+                            value={value} 
+                            placeholder='Enter...' 
+                            style={styles.input}
+                            onChangeText = {(text) => setValue(text)}
+                        >
+                        </TextInput>
+                        <View style={{alignItems: 'flex-end'}}>
+                        <Pressable onPress={create} style={styles.btn}>
+                            <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
+                        </Pressable>
+                        </View>
+                        <View style={{marginTop: 10, flexDirection: "row"}}>
+                            <Text style={{fontSize: 15, fontWeight: "bold"}}>Or upload with File</Text>
+                            <Text 
+                                style={{marginLeft: 5, fontSize: 15, color: "orange"}} 
+                                onPress={() => Linking.openURL('https://docs.google.com/spreadsheets/d/1cL5OHRTcJeASlZVX3LKYGVoLX67IXeIW/edit?usp=sharing&amp;ouid=114759917748435653610&amp;rtpof=true&amp;sd=true')}>
+                                Download sample file
+                            </Text>
+                        </View>
+                        <Pressable style={{marginTop: 10, padding: 10, backgroundColor: "lightgray", width: 70, flexDirection: "row", borderRadius: 5}} onPress={pickFile}>
+                            <Text>Browse</Text>
+                            <Text style={{marginLeft: 20, width: 300}}>{fileType ? `${fileType.name}` : ""}</Text>
+                        </Pressable>
+                        <View style={{alignItems: 'flex-end'}}>
+                        <Pressable onPress={createWithFile} style={styles.btn}>
+                            <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
+                        </Pressable>
+                        </View>
+                    </View>  
                 </View>
                 : page == "services" ? 
                 <View>
@@ -293,7 +452,7 @@ const Add = ({navigation, route}) => {
                     <Text style={{fontSize: 20, fontWeight: "bold", textAlign: "center"}}>Create Service</Text>
                 </View>
                 <View style={{paddingHorizontal: 10}}>
-                    <Text style={{marginBottom: 10}}>Name</Text>
+                    <Text style={{marginBottom: 10, fontSize: 15, fontWeight: "bold"}}>Name</Text>
                     <TextInput
                         value={value} 
                         placeholder='Enter...' 
@@ -302,7 +461,24 @@ const Add = ({navigation, route}) => {
                     >
                     </TextInput>
                     <View style={{alignItems: 'flex-end'}}>
-                    <Pressable onPress={create} style={styles.btn}>
+                        <Pressable onPress={create} style={styles.btn}>
+                            <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
+                        </Pressable>
+                    </View>
+                    <View style={{marginTop: 10, flexDirection: "row"}}>
+                        <Text style={{fontSize: 15, fontWeight: "bold"}}>Or upload with File</Text>
+                        <Text 
+                            style={{marginLeft: 5, fontSize: 15, color: "orange"}} 
+                            onPress={() => Linking.openURL('https://docs.google.com/spreadsheets/d/1cL5OHRTcJeASlZVX3LKYGVoLX67IXeIW/edit?usp=sharing&amp;ouid=114759917748435653610&amp;rtpof=true&amp;sd=true')}>
+                            Download sample file
+                        </Text>
+                    </View>
+                    <Pressable style={{marginTop: 10, padding: 10, backgroundColor: "lightgray", width: 70, flexDirection: "row", borderRadius: 5}} onPress={pickFile}>
+                        <Text>Browse</Text>
+                        <Text style={{marginLeft: 20, width: 300}}>{fileService ? `${fileService.name}` : ""}</Text>
+                    </Pressable>
+                    <View style={{alignItems: 'flex-end'}}>
+                    <Pressable onPress={createWithFile} style={styles.btn}>
                         <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
                     </Pressable>
                     </View>
@@ -314,7 +490,7 @@ const Add = ({navigation, route}) => {
                     <Text style={{fontSize: 20, fontWeight: "bold", textAlign: "center"}}>Create Destination</Text>
                 </View>
                 <View style={{paddingHorizontal: 10}}>
-                    <Text style={{marginVertical: 10}}>Name</Text>
+                    <Text style={{marginVertical: 10, fontSize: 15, fontWeight: "bold"}}>Name</Text>
                     <TextInput
                         value={name} 
                         placeholder='Enter...' 
@@ -322,7 +498,7 @@ const Add = ({navigation, route}) => {
                         onChangeText = {(text) => setName(text)}
                     >
                     </TextInput>
-                    <Text style={{marginVertical: 10}}>Content</Text>
+                    <Text style={{marginVertical: 10, fontSize: 15, fontWeight: "bold"}}>Content</Text>
                     <TextInput
                         multiline={true}
                         numberOfLines={4}
@@ -332,7 +508,7 @@ const Add = ({navigation, route}) => {
                         onChangeText = {(text) => setContent(text)}
                     >
                     </TextInput>
-                    <Text style={{marginVertical: 10}}>Address</Text>
+                    <Text style={{marginVertical: 10, fontSize: 15, fontWeight: "bold"}}>Address</Text>
                     <TextInput
                         multiline={true}
                         numberOfLines={4}
@@ -389,7 +565,7 @@ const Add = ({navigation, route}) => {
                         />
                         </View>
                     </View>
-                    <Text style={{marginVertical: 10}}>Operating Time</Text>
+                    <Text style={{marginVertical: 10, fontSize: 15, fontWeight: "bold"}}>Operating Time</Text>
                     <TextInput
                         value={operatingTime} 
                         placeholder='Enter...' 
@@ -397,7 +573,7 @@ const Add = ({navigation, route}) => {
                         onChangeText = {(text) => setoperatingTime(text)}
                     >
                     </TextInput>
-                    <Text style={{marginVertical: 10}}>Price</Text>
+                    <Text style={{marginVertical: 10, fontSize: 15, fontWeight: "bold"}}>Price</Text>
                     <TextInput
                         value={price} 
                         placeholder='Enter...' 
@@ -405,7 +581,7 @@ const Add = ({navigation, route}) => {
                         onChangeText = {(text) => setPrice(text)}
                     >
                     </TextInput>
-                    <Text style={{marginVertical: 10}}>Capacity</Text>
+                    <Text style={{marginVertical: 10, fontSize: 15, fontWeight: "bold"}}>Capacity</Text>
                     <TextInput
                         value={capacity} 
                         placeholder='Enter...' 
@@ -413,7 +589,7 @@ const Add = ({navigation, route}) => {
                         onChangeText = {(text) => setCapacity(text)}
                     >
                     </TextInput>
-                    <Text style={{marginVertical: 10}}>Contact</Text>
+                    <Text style={{marginVertical: 10, fontSize: 15, fontWeight: "bold"}}>Contact</Text>
                     <TextInput
                         value={contact} 
                         placeholder='Enter...' 
@@ -421,7 +597,7 @@ const Add = ({navigation, route}) => {
                         onChangeText = {(text) => setContact(text)}
                     >
                     </TextInput>
-                    <Text style={{marginVertical: 10}}>Google map</Text>
+                    <Text style={{marginVertical: 10, fontSize: 15, fontWeight: "bold"}}>Google map</Text>
                     <TextInput
                         value={map} 
                         placeholder='Enter...' 
@@ -429,7 +605,7 @@ const Add = ({navigation, route}) => {
                         onChangeText = {(text) => setMap(text)}
                     >
                     </TextInput>
-                    <Text style={{marginVertical: 10}}>Type </Text>
+                    <Text style={{marginVertical: 10, fontSize: 15, fontWeight: "bold"}}>Type </Text>
                     <View style={{flexDirection: "row", flexWrap: 'wrap'}}>
                         {
                             types.map((item, index)=>{
@@ -445,7 +621,7 @@ const Add = ({navigation, route}) => {
                             })
                         }
                     </View>
-                    <Text style={{marginVertical: 10}}>Service </Text>
+                    <Text style={{marginVertical: 10, fontSize: 15, fontWeight: "bold"}}>Service </Text>
                     <View style={{flexDirection: "row", flexWrap: 'wrap'}}>
                         {
                             services.map((item, index)=>{
@@ -461,16 +637,30 @@ const Add = ({navigation, route}) => {
                             })
                         }
                     </View>
-                    <Text style={{marginVertical: 10}}>Image</Text>
-                    <TextInput
-                        value={image} 
-                        placeholder='Enter...' 
-                        style={styles.input}
-                        onChangeText = {(text) => setImage(text)}
-                    >
-                    </TextInput>
+                    <Text style={{marginVertical: 10, fontSize: 15, fontWeight: "bold"}}>Image</Text>
+                    <Pressable style={{padding: 10, backgroundColor: "lightgray", width: 70, flexDirection: "row", borderRadius: 5}} onPress={pickImage}>
+                        <Text>Browse</Text>
+                        <Text style={{marginLeft: 20, width: 300}}>{number > 0 ? `Number of files selected: ${number}` : ""}</Text>
+                    </Pressable>
                     <View style={{alignItems: 'flex-end'}}>
-                    <Pressable onPress={create} style={styles.btn}>
+                    <Pressable onPress={createDes} style={styles.btn}>
+                        <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
+                    </Pressable>
+                    </View>
+                    <View style={{marginTop: 10, flexDirection: "row"}}>
+                        <Text style={{fontSize: 15, fontWeight: "bold"}}>Or upload with File</Text>
+                        <Text 
+                            style={{marginLeft: 5, fontSize: 15, color: "orange"}} 
+                            onPress={() => Linking.openURL('https://docs.google.com/spreadsheets/d/1-iAZe1aB-tqTvtigK80pGowue84P8O2S/edit?usp=sharing&amp;ouid=114759917748435653610&amp;rtpof=true&amp;sd=true')}>
+                            Download sample file
+                        </Text>
+                    </View>
+                    <Pressable style={{marginTop: 10, padding: 10, backgroundColor: "lightgray", width: 70, flexDirection: "row", borderRadius: 5}} onPress={pickFile}>
+                        <Text>Browse</Text>
+                        <Text style={{marginLeft: 20, width: 300}}>{fileDes ? `${fileDes.name}` : ""}</Text>
+                    </Pressable>
+                    <View style={{alignItems: 'flex-end'}}>
+                    <Pressable onPress={createWithFile} style={styles.btn}>
                         <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
                     </Pressable>
                     </View>
@@ -482,7 +672,7 @@ const Add = ({navigation, route}) => {
                     <Text style={{fontSize: 20, fontWeight: "bold", textAlign: "center"}}>Create Tour</Text>
                 </View>
                 <View style={{paddingHorizontal: 10}}>
-                    <Text style={{marginVertical: 10}}>Title</Text>
+                    <Text style={{marginVertical: 10, fontSize: 15, fontWeight: "bold"}}>Title</Text>
                     <TextInput
                         value={title} 
                         placeholder='Enter...' 
@@ -490,7 +680,7 @@ const Add = ({navigation, route}) => {
                         onChangeText = {(text) => setTitle(text)}
                     >
                     </TextInput>
-                    <Text style={{marginVertical: 10}}>Content</Text>
+                    <Text style={{marginVertical: 10, fontSize: 15, fontWeight: "bold"}}>Content</Text>
                     <TextInput
                         multiline={true}
                         numberOfLines={4}
@@ -500,7 +690,7 @@ const Add = ({navigation, route}) => {
                         onChangeText = {(text) => setContent(text)}
                     >
                     </TextInput>
-                    <Text style={{marginVertical: 10}}>Time</Text>
+                    <Text style={{marginVertical: 10, fontSize: 15, fontWeight: "bold"}}>Time</Text>
                     <TextInput
                         value={time} 
                         placeholder='Enter...' 
@@ -508,7 +698,7 @@ const Add = ({navigation, route}) => {
                         onChangeText = {(text) => setTime(text)}
                     >
                     </TextInput>
-                    <Text style={{marginVertical: 10}}>Price</Text>
+                    <Text style={{marginVertical: 10,fontSize: 15, fontWeight: "bold"}}>Price</Text>
                     <TextInput
                         value={price.toString()} 
                         placeholder='Enter...' 
@@ -516,7 +706,7 @@ const Add = ({navigation, route}) => {
                         onChangeText = {(text) => setPrice(text)}
                     >
                     </TextInput>
-                    <Text style={{marginVertical: 10}}>Contact</Text>
+                    <Text style={{marginVertical: 10, fontSize: 15, fontWeight: "bold"}}>Contact</Text>
                     <TextInput
                         value={contact} 
                         placeholder='Enter...' 
@@ -524,7 +714,7 @@ const Add = ({navigation, route}) => {
                         onChangeText = {(text) => setContact(text)}
                     >
                     </TextInput>
-                    <Text style={{marginVertical: 10}}>Destination </Text>
+                    <Text style={{marginVertical: 10, fontSize: 15, fontWeight: "bold"}}>Destination </Text>
                     <View style={{}}>
                         {
                             destinations.map((item, index)=>{
@@ -540,22 +730,36 @@ const Add = ({navigation, route}) => {
                             })
                         }
                     </View>
-                    <Text style={{marginVertical: 10}}>Image</Text>
-                    <TextInput
-                        value={image} 
-                        placeholder='Enter...' 
-                        style={styles.input}
-                        onChangeText = {(text) => setImage(text)}
-                    >
-                    </TextInput>
+                    <Text style={{marginVertical: 10, fontSize: 15, fontWeight: "bold"}}>Image</Text>
+                    <Pressable style={{padding: 10, backgroundColor: "lightgray", width: 70, flexDirection: "row", borderRadius: 5}} onPress={pickImage}>
+                        <Text>Browse</Text>
+                        <Text style={{marginLeft: 20, width: 300}}>{number > 0 ? `Number of files selected: ${number}` : ""}</Text>
+                    </Pressable>
                     <View style={{alignItems: 'flex-end'}}>
-                    <Pressable onPress={create} style={styles.btn}>
+                    <Pressable onPress={createTour} style={styles.btn}>
+                        <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
+                    </Pressable>
+                    </View>
+                    <View style={{marginTop: 10, flexDirection: "row"}}>
+                        <Text style={{fontSize: 15, fontWeight: "bold"}}>Or upload with File</Text>
+                        <Text 
+                            style={{marginLeft: 5, fontSize: 15, color: "orange"}} 
+                            onPress={() => Linking.openURL('https://docs.google.com/spreadsheets/d/1-rpCYteyRQER0GdJtAZ0dSNT8iCIzYxW/edit?usp=sharing&amp;ouid=114759917748435653610&amp;rtpof=true&amp;sd=true')}>
+                            Download sample file
+                        </Text>
+                    </View>
+                    <Pressable style={{marginTop: 10, padding: 10, backgroundColor: "lightgray", width: 70, flexDirection: "row", borderRadius: 5}} onPress={pickFile}>
+                        <Text>Browse</Text>
+                        <Text style={{marginLeft: 20, width: 300}}>{fileDes ? `${fileDes.name}` : ""}</Text>
+                    </Pressable>
+                    <View style={{alignItems: 'flex-end'}}>
+                    <Pressable onPress={createWithFile} style={styles.btn}>
                         <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
                     </Pressable>
                     </View>
                 </View>
                 </ScrollView>
-                : <Text>abc</Text>
+                : <Text>Not found</Text>
             }
             
         </View>
