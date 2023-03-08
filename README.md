@@ -9,4 +9,4 @@ Website allows users to search for tourist attractions and tours in Can Tho, col
   + Create review
   + Save favorite tourist attractions
   + Book tour
-- Technology in use: React Native
+- Technology in use: React Native, JavaScript
