@@ -41,7 +41,8 @@ const ManageTour = ({navigation, route}) => {
                     headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
                     })
                     .then(function(res){
-                        navigation.navigate("manageTour")
+                        // navigation.navigate("manageTour")
+                        setTours(tours.filter((tour) => tour._id !== data))
                     })
                     .catch(function(err){
                         console.log("Err:", err)
@@ -108,8 +109,9 @@ const ManageTour = ({navigation, route}) => {
                         headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
                         })
                         .then(function(res){
+                            //navigation.navigate("manageTour")
+                            setTours(tours.filter((tour) => !checked.includes(tour._id)))
                             setChecked([])
-                            navigation.navigate("manageTour")
                         })
                         .catch(function(err){
                             console.log("Err:", err)
@@ -132,7 +134,7 @@ const ManageTour = ({navigation, route}) => {
 
     useEffect(()=>{
         findAllTour()
-    }, [tours])
+    }, [])
     return (
         <View style={{backgroundColor: "#fff", flex: 1}}>
             <Header navigation={navigation} route={route} />
@@ -149,7 +151,7 @@ const ManageTour = ({navigation, route}) => {
             <Pressable style={{paddingVertical: 10, paddingHorizontal: 5}} onPress={deleteManyTour}>
                 <Icon2 name="delete" size={18} style={{color: "orange"}}></Icon2>
             </Pressable>
-            <Pressable style={{paddingVertical: 10, paddingHorizontal: 5, backgroundColor: "#04B404", borderRadius: 5, width: 65, marginLeft: 200}} onPress={()=>navigation.navigate("add", {addStyle: "tours"})}>
+            <Pressable style={{paddingVertical: 10, paddingHorizontal: 5, backgroundColor: "#04B404", borderRadius: 5, width: 65, marginLeft: 200}} onPress={()=>navigation.navigate("add", {addStyle: "tours", rerender: setTours})}>
                 <Text style={{color: "white", textAlign: "center"}}>Create</Text>
             </Pressable>
             </View>
@@ -179,7 +181,7 @@ const ManageTour = ({navigation, route}) => {
                                 <Text style={{width: "10%"}}>{index+1}</Text>
                                 <Text style={{width: "35%"}}>{item.title}</Text>
                                 <Text style={{width: "25%"}}>{s}</Text>
-                                <Pressable style={{marginLeft: 10}} onPress={()=>{navigation.navigate("edit", {editStyle: "tour", tour: item})}}>
+                                <Pressable style={{marginLeft: 10}} onPress={()=>{navigation.navigate("edit", {editStyle: "tour", tour: item, rerender: setTours})}}>
                                     <Icon name="pencil" size={18} style={{color: "orange"}}></Icon>
                                 </Pressable>
                                 <Pressable style={{marginLeft: 20}} onPress={()=>deleteTour(item._id)}>

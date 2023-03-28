@@ -6,9 +6,11 @@ import { AuthContext } from '../contexts/auth'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import Icon2 from 'react-native-vector-icons/AntDesign'
 import Checkbox from 'expo-checkbox';
+import { useRoute } from '@react-navigation/native';
 
 // const address = "http://192.168.1.12:5000"
 const ManageService = ({navigation, route}) => {
+    const state = useRoute()
     const {userToken} = useContext(AuthContext)
     const {address} = useContext(AuthContext)
     const [services, setServices] = useState([])
@@ -41,7 +43,8 @@ const ManageService = ({navigation, route}) => {
                     headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
                     })
                     .then(function(res){
-                        navigation.navigate("manageService")
+                        //navigation.navigate("manageService")
+                        setServices(services.filter((service) => service._id !== data))
                     })
                     .catch(function(err){
                         console.log("Err:", err)
@@ -108,8 +111,9 @@ const ManageService = ({navigation, route}) => {
                         headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
                         })
                         .then(function(res){
+                            //navigation.navigate("manageService")
+                            setServices(services.filter((service) => !checked.includes(service._id)))
                             setChecked([])
-                            navigation.navigate("manageService")
                         })
                         .catch(function(err){
                             console.log("Err:", err)
@@ -132,7 +136,7 @@ const ManageService = ({navigation, route}) => {
 
     useEffect(()=>{
         findAllService()
-    }, [services])
+    }, [])
     return (
         <View style={{backgroundColor: "#fff", flex: 1}}>
             <Header navigation={navigation} route={route} />
@@ -150,7 +154,7 @@ const ManageService = ({navigation, route}) => {
                     <Text style={{color: "orange"}}>Type</Text>
                 </Pressable>
                 <Pressable style={{paddingHorizontal: 10}} onPress={()=>navigation.navigate("manageService")}>
-                    <Text style={{color: "orange"}}>Service</Text>
+                    <Text style={state.name == "manageService" ? {color: "orange", fontWeight: "bold"} : {color: "orange"}}>Service</Text>
                 </Pressable>
             </View>
             <ScrollView>
@@ -166,7 +170,7 @@ const ManageService = ({navigation, route}) => {
             <Pressable style={{paddingVertical: 10, paddingHorizontal: 5}} onPress={deleteManyService}>
                 <Icon2 name="delete" size={18} style={{color: "orange"}}></Icon2>
             </Pressable>
-            <Pressable style={{paddingVertical: 10, paddingHorizontal: 5, backgroundColor: "#04B404", borderRadius: 5, width: 65, marginLeft: 200}} onPress={()=>navigation.navigate("add", {addStyle: "services"})}>
+            <Pressable style={{paddingVertical: 10, paddingHorizontal: 5, backgroundColor: "#04B404", borderRadius: 5, width: 65, marginLeft: 200}} onPress={()=>navigation.navigate("add", {addStyle: "services", rerender: setServices})}>
                 <Text style={{color: "white", textAlign: "center"}}>Create</Text>
             </Pressable>
             </View>
@@ -195,7 +199,7 @@ const ManageService = ({navigation, route}) => {
                                 <Text style={{width: "10%"}}>{index+1}</Text>
                                 <Text style={{width: "35%"}}>{item.name}</Text>
                                 <Text style={{width: "25%"}}>{s}</Text>
-                                <Pressable style={{marginLeft: 10}} onPress={()=>{navigation.navigate("edit", {editStyle: "service", _id: item._id, name: item.name})}}>
+                                <Pressable style={{marginLeft: 10}} onPress={()=>{navigation.navigate("edit", {editStyle: "service", _id: item._id, name: item.name, rerender: setServices})}}>
                                     <Icon name="pencil" size={18} style={{color: "orange"}}></Icon>
                                 </Pressable>
                                 <Pressable style={{marginLeft: 20}} onPress={()=>deleteService(item._id)}>

@@ -1,7 +1,7 @@
 import { View, Text, Pressable, Alert, ScrollView } from 'react-native'
 import Header from '../components/header'
 import axios from 'axios'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useReducer, useState } from 'react'
 import { AuthContext } from '../contexts/auth'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import Icon2 from 'react-native-vector-icons/AntDesign'
@@ -41,7 +41,8 @@ const ManageDestination = ({navigation, route}) => {
                     headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
                     })
                     .then(function(res){
-                        navigation.navigate("manageDestination")
+                        // navigation.navigate("manageDestination")
+                        setDestinations(destinations.filter((destination) => destination._id !== data))
                     })
                     .catch(function(err){
                         console.log("Err:", err)
@@ -108,8 +109,9 @@ const ManageDestination = ({navigation, route}) => {
                         headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
                         })
                         .then(function(res){
+                            // navigation.navigate("manageDestination")
+                            setDestinations(destinations.filter((destination) => !checked.includes(destination._id)))
                             setChecked([])
-                            navigation.navigate("manageDestination")
                         })
                         .catch(function(err){
                             console.log("Err:", err)
@@ -132,7 +134,10 @@ const ManageDestination = ({navigation, route}) => {
 
     useEffect(()=>{
         findAllDestination()
-    }, [destinations])
+    }, [])
+    useReducer(()=>{
+        findAllDestination()
+    }, [])
     return (
         <View style={{backgroundColor: "#fff", flex: 1}}>
             <Header navigation={navigation} route={route} />
@@ -149,7 +154,9 @@ const ManageDestination = ({navigation, route}) => {
             <Pressable style={{paddingVertical: 10, paddingHorizontal: 5}} onPress={deleteManyDestination}>
                 <Icon2 name="delete" size={18} style={{color: "orange"}}></Icon2>
             </Pressable>
-            <Pressable style={{paddingVertical: 10, paddingHorizontal: 5, backgroundColor: "#04B404", borderRadius: 5, width: 65, marginLeft: 200}} onPress={()=>navigation.navigate("add", {addStyle: "destinations"})}>
+            <Pressable style={{paddingVertical: 10, paddingHorizontal: 5, 
+                    backgroundColor: "#04B404", borderRadius: 5, width: 65, marginLeft: 200}} 
+                    onPress={()=>navigation.navigate("add", {addStyle: "destinations", rerender: setDestinations})}>
                 <Text style={{color: "white", textAlign: "center"}}>Create</Text>
             </Pressable>
             </View>
@@ -179,7 +186,7 @@ const ManageDestination = ({navigation, route}) => {
                                 <Text style={{width: "10%"}}>{index+1}</Text>
                                 <Text style={{width: "35%"}}>{item.name}</Text>
                                 <Text style={{width: "25%"}}>{s}</Text>
-                                <Pressable style={{marginLeft: 10}} onPress={()=>{navigation.navigate("edit", {editStyle: "destination", destination: item})}}>
+                                <Pressable style={{marginLeft: 10}} onPress={()=>{navigation.navigate("edit", {editStyle: "destination", destination: item, rerender: setDestinations})}}>
                                     <Icon name="pencil" size={18} style={{color: "orange"}}></Icon>
                                 </Pressable>
                                 <Pressable style={{marginLeft: 20}} onPress={()=>deleteDestination(item._id)}>
@@ -189,6 +196,9 @@ const ManageDestination = ({navigation, route}) => {
                 })
             }
             </ScrollView>
+            {
+                console.log(destinations)
+            }
         </View>
     )
 }

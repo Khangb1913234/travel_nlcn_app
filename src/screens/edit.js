@@ -249,6 +249,19 @@ const Edit = ({navigation, route}) => {
             })
                 .then(function(res){
                     //console.log(res.data.msg)
+                    axios.get(`${address}/me/stored/accounts`, {
+                        headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
+                    })
+                    .then(function(res){
+                        var arr1 = []
+                        for(var i = 0; i < res.data.accounts.length; i++){
+                            arr1.push(res.data.accounts[i])
+                        }
+                        route.params.rerender(arr1)
+                    })
+                    .catch(function(err){
+                        console.log("Err:", err)
+                    })
                     navigation.navigate("manageAccount")
                 })
                 .catch(function(err){
@@ -264,7 +277,19 @@ const Edit = ({navigation, route}) => {
                 headers: {Authorization: `Bearer ${userToken.token}`},
             })
                 .then(function(res){
-                    //console.log(res.data.msg)
+                    axios.get(`${address}/me/stored/types`, {
+                        headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
+                    })
+                      .then(function(res){
+                        var arr1 = []
+                        for(var i = 0; i < res.data.types.length; i++){
+                            arr1.push(res.data.types[i])
+                        }
+                        route.params.rerender(arr1)
+                      })
+                      .catch(function(err){
+                        console.log("Err:", err)
+                      })
                     navigation.navigate("manageType")
                 })
                 .catch(function(err){
@@ -280,7 +305,19 @@ const Edit = ({navigation, route}) => {
                 headers: {Authorization: `Bearer ${userToken.token}`},
             })
                 .then(function(res){
-                    //console.log(res.data.msg)
+                    axios.get(`${address}/me/stored/services`, {
+                        headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
+                    })
+                      .then(function(res){
+                        var arr1 = []
+                        for(var i = 0; i < res.data.services.length; i++){
+                            arr1.push(res.data.services[i])
+                        }
+                        route.params.rerender(arr1)
+                      })
+                      .catch(function(err){
+                        console.log("Err:", err)
+                      })
                     navigation.navigate("manageService")
                 })
                 .catch(function(err){
@@ -340,6 +377,20 @@ const Edit = ({navigation, route}) => {
                   },
                   body: data,
                 });
+                axios.get(`${address}/me/stored/destinations`, {
+                    headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
+                })
+                .then(function(res){
+                    var arr1 = []
+                    for(var i = 0; i < res.data.destinations.length; i++){
+                        arr1.push(res.data.destinations[i])
+                    }
+                        route.params.rerender(arr1)
+                })
+                .catch(function(err){
+                    console.log("Err:", err)
+                })
+                
                 navigation.navigate("manageDestination")
             } catch (error) {
                 console.log(error);
@@ -383,6 +434,19 @@ const Edit = ({navigation, route}) => {
                   },
                   body: data,
                 });
+                axios.get(`${address}/me/stored/tours`, {
+                    headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
+                })
+                .then(function(res){
+                    var arr1 = []
+                    for(var i = 0; i < res.data.tours.length; i++){
+                        arr1.push(res.data.tours[i])
+                    }
+                    route.params.rerender(arr1)
+                })
+                .catch(function(err){
+                    console.log("Err:", err)
+                })
                 navigation.navigate("manageTour")
             } catch (error) {
                 console.log(error);

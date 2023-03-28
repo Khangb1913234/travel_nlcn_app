@@ -6,9 +6,11 @@ import { AuthContext } from '../contexts/auth'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import Icon2 from 'react-native-vector-icons/AntDesign'
 import Checkbox from 'expo-checkbox';
+import { useRoute } from '@react-navigation/native';
 
 // const address = "http://192.168.1.12:5000"
 const ManageAccount = ({navigation, route}) => {
+    const state = useRoute()
     const {userToken} = useContext(AuthContext)
     const {address} = useContext(AuthContext)
     const [accounts, setAccounts] = useState([])
@@ -41,7 +43,8 @@ const ManageAccount = ({navigation, route}) => {
                     headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
                     })
                     .then(function(res){
-                        navigation.navigate("manageAccount")
+                        // navigation.navigate("manageAccount")
+                        setAccounts(accounts.filter((account) => account._id !== data))
                     })
                     .catch(function(err){
                         console.log("Err:", err)
@@ -72,8 +75,9 @@ const ManageAccount = ({navigation, route}) => {
                         headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
                         })
                         .then(function(res){
+                           // navigation.navigate("manageAccount")
+                            setAccounts(accounts.filter((account) => !checked.includes(account._id)))
                             setChecked([])
-                            navigation.navigate("manageAccount")
                         })
                         .catch(function(err){
                             console.log("Err:", err)
@@ -133,13 +137,13 @@ const ManageAccount = ({navigation, route}) => {
 
     useEffect(()=>{
         findAllAccount()
-    }, [accounts])
+    }, [])
     return (
         <View style={{backgroundColor: "#fff", flex: 1}}>
             <Header navigation={navigation} route={route} />
             <View style={{flexDirection: "row", margin: 5}}>
                 <Pressable style={{paddingHorizontal: 10}} onPress={()=>navigation.navigate("manageAccount")}>
-                    <Text style={{color: "orange"}}>Account</Text>
+                    <Text style={state.name == "manageAccount" ? {color: "orange", fontWeight: "bold"} : {color: "orange"}}>Account</Text>
                 </Pressable>
                 <Pressable style={{paddingHorizontal: 10}} onPress={()=>navigation.navigate("manageApproval", {locate: "destinations"})}>
                     <Text style={{color: "orange"}}>Approval</Text>
@@ -195,7 +199,7 @@ const ManageAccount = ({navigation, route}) => {
                                 <Text style={{width: "25%"}}>{item.username}</Text>
                                 <Text style={{width: "15%"}}>{item.role}</Text>
                                 <Text style={{width: "25%"}}>{s}</Text>
-                                <Pressable style={{marginLeft: 10}} onPress={()=>{navigation.navigate("edit", {editStyle: "account", _id: item._id, role: item.role})}}>
+                                <Pressable style={{marginLeft: 10}} onPress={()=>{navigation.navigate("edit", {editStyle: "account", _id: item._id, role: item.role, rerender: setAccounts})}}>
                                     <Icon name="pencil" size={18} style={{color: "orange"}}></Icon>
                                 </Pressable>
                                 <Pressable style={{marginLeft: 20}} onPress={()=>deleteAccount(item._id)}>

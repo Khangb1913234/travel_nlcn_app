@@ -240,7 +240,7 @@ const Destinations = ({navigation, route}) => {
     useEffect(()=>{
         if(search == "")
             findAllDestination()
-    }, [destinations])
+    }, [])
 
     useEffect(()=>{
         findAllAddress()

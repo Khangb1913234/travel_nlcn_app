@@ -6,9 +6,11 @@ import { AuthContext } from '../contexts/auth'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import Icon2 from 'react-native-vector-icons/AntDesign'
 import Checkbox from 'expo-checkbox';
+import { useRoute } from '@react-navigation/native';
 
 // const address = "http://192.168.1.12:5000"
 const ManageType = ({navigation, route}) => {
+    const state = useRoute()
     const {userToken} = useContext(AuthContext)
     const {address} = useContext(AuthContext)
     const [types, setTypes] = useState([])
@@ -41,7 +43,8 @@ const ManageType = ({navigation, route}) => {
                     headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
                     })
                     .then(function(res){
-                        navigation.navigate("manageType")
+                        // navigation.navigate("manageType")
+                        setTypes(types.filter((type) => type._id !== data))
                     })
                     .catch(function(err){
                         console.log("Err:", err)
@@ -108,8 +111,9 @@ const ManageType = ({navigation, route}) => {
                         headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
                         })
                         .then(function(res){
+                            //navigation.navigate("manageType")
+                            setTypes(types.filter((type) => !checked.includes(type._id)))
                             setChecked([])
-                            navigation.navigate("manageType")
                         })
                         .catch(function(err){
                             console.log("Err:", err)
@@ -132,7 +136,7 @@ const ManageType = ({navigation, route}) => {
 
     useEffect(()=>{
         findAllType()
-    }, [types])
+    }, [])
     return (
         <View style={{backgroundColor: "#fff", flex: 1}}>
             <Header navigation={navigation} route={route} />
@@ -147,7 +151,7 @@ const ManageType = ({navigation, route}) => {
                     <Text style={{color: "orange"}}>Unapproval</Text>
                 </Pressable>
                 <Pressable style={{paddingHorizontal: 10}} onPress={()=>navigation.navigate("manageType")}>
-                    <Text style={{color: "orange"}}>Type</Text>
+                    <Text style={state.name == "manageType" ? {color: "orange", fontWeight: "bold"} : {color: "orange"}}>Type</Text>
                 </Pressable>
                 <Pressable style={{paddingHorizontal: 10}} onPress={()=>navigation.navigate("manageService")}>
                     <Text style={{color: "orange"}}>Service</Text>
@@ -166,7 +170,7 @@ const ManageType = ({navigation, route}) => {
             <Pressable style={{paddingVertical: 10, paddingHorizontal: 5}} onPress={deleteManyType}>
                 <Icon2 name="delete" size={18} style={{color: "orange"}}></Icon2>
             </Pressable>
-            <Pressable style={{paddingVertical: 10, paddingHorizontal: 5, backgroundColor: "#04B404", borderRadius: 5, width: 65, marginLeft: 200}} onPress={()=>navigation.navigate("add", {addStyle: "types"})}>
+            <Pressable style={{paddingVertical: 10, paddingHorizontal: 5, backgroundColor: "#04B404", borderRadius: 5, width: 65, marginLeft: 200}} onPress={()=>navigation.navigate("add", {addStyle: "types", rerender: setTypes})}>
                 <Text style={{color: "white", textAlign: "center"}}>Create</Text>
             </Pressable>
             </View>
@@ -195,7 +199,7 @@ const ManageType = ({navigation, route}) => {
                                 <Text style={{width: "10%"}}>{index+1}</Text>
                                 <Text style={{width: "35%"}}>{item.name}</Text>
                                 <Text style={{width: "25%"}}>{s}</Text>
-                                <Pressable style={{marginLeft: 10}} onPress={()=>{navigation.navigate("edit", {editStyle: "type", _id: item._id, name: item.name})}}>
+                                <Pressable style={{marginLeft: 10}} onPress={()=>{navigation.navigate("edit", {editStyle: "type", _id: item._id, name: item.name, rerender: setTypes})}}>
                                     <Icon name="pencil" size={18} style={{color: "orange"}}></Icon>
                                 </Pressable>
                                 <Pressable style={{marginLeft: 20}} onPress={()=>deleteType(item._id)}>

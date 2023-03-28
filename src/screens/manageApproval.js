@@ -6,6 +6,9 @@ import { AuthContext } from '../contexts/auth'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import Icon2 from 'react-native-vector-icons/AntDesign'
 import Checkbox from 'expo-checkbox';
+// import NavTop from '../components/nav_top'
+import { useRoute } from '@react-navigation/native';
+
 
 // const address = "http://192.168.1.12:5000"
 const ManageApproval = ({navigation, route}) => {
@@ -14,6 +17,9 @@ const ManageApproval = ({navigation, route}) => {
     const [approvals, setApprovals] = useState([])
     const [checked, setChecked] = useState([])
     const [isSelectedAll, setSelectionAll] = useState(false)
+
+    const state = useRoute()
+
     const findAllApproval = function(){
         axios.get(`${address}/me/stored/approvals/${route.params.locate}`, {
             headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
@@ -134,6 +140,7 @@ const ManageApproval = ({navigation, route}) => {
     useEffect(()=>{
         findAllApproval()
     }, [approvals])
+
     return (
         <View style={{backgroundColor: "#fff", flex: 1}}>
             <Header navigation={navigation} route={route} />
@@ -142,7 +149,7 @@ const ManageApproval = ({navigation, route}) => {
                     <Text style={{color: "orange"}}>Account</Text>
                 </Pressable>
                 <Pressable style={{paddingHorizontal: 10}} onPress={()=>navigation.navigate("manageApproval", {locate: "destinations"})}>
-                    <Text style={{color: "orange"}}>Approval</Text>
+                    <Text style={state.name == "manageApproval" ? {color: "orange", fontWeight: "bold"} : {color: "orange"}}>Approval</Text>
                 </Pressable>
                 <Pressable style={{paddingHorizontal: 10}} onPress={()=>navigation.navigate("manageUnapproval", {locate: "destinations"})}>
                     <Text style={{color: "orange"}}>Unapproval</Text>
@@ -157,10 +164,10 @@ const ManageApproval = ({navigation, route}) => {
             <ScrollView>
             <View style={{flexDirection: "row", marginTop: 15, marginHorizontal: 5}}>
                 <Pressable style={{paddingHorizontal: 5, borderRightWidth: 1, borderColor: "#BDBDBD"}} onPress={()=>navigation.navigate("manageApproval", {locate: "destinations"})}>
-                    <Text style={{color: "orange"}}>Destination</Text>
+                    <Text style={route.params.locate == "destinations" ? {color: "orange", fontWeight: "bold"} : {color: "orange", }}>Destination</Text>
                 </Pressable>
                 <Pressable style={{paddingHorizontal: 5}} onPress={()=>navigation.navigate("manageApproval", {locate: "tours"})}>
-                    <Text style={{color: "orange"}}>Tour</Text>
+                    <Text style={route.params.locate == "tours" ? {color: "orange", fontWeight: "bold"} : {color: "orange", }}>Tour</Text>
                 </Pressable>
             </View>
             <Text style={{margin: 10, fontSize: 20, fontWeight: "bold"}}>Approval</Text>
