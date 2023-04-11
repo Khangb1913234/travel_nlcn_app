@@ -1,8 +1,8 @@
 import { View, Text, Pressable, Alert, ScrollView } from 'react-native'
-import Header from '../components/header'
+import Header from '../../components/header'
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
-import { AuthContext } from '../contexts/auth'
+import { AuthContext } from '../../contexts/auth'
 import Icon from 'react-native-vector-icons/Ionicons'
 import Icon2 from 'react-native-vector-icons/AntDesign'
 import Checkbox from 'expo-checkbox';

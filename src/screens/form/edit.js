@@ -1,49 +1,49 @@
-import { View, Text, Pressable, TextInput, StyleSheet, Keyboard, ScrollView} from 'react-native'
-import Header from '../components/header'
-import React, { useContext, useState, useEffect } from 'react'
+import { View, Text, Pressable, TextInput, StyleSheet, Keyboard, ScrollView, Ch} from 'react-native'
+import Header from '../../components/header'
+import React, { useContext, useEffect, useState } from 'react'
 import axios from 'axios'
-import { AuthContext } from '../contexts/auth'
+import { AuthContext } from '../../contexts/auth'
 import { Dropdown } from 'react-native-element-dropdown';
 import Checkbox from 'expo-checkbox';
 import * as ImagePicker from 'expo-image-picker';
-import * as DocumentPicker from 'expo-document-picker';
-import { Linking } from 'react-native';
-import { useNavigation } from '@react-navigation/native'
 
 // const address = "http://192.168.1.12:5000"
-const Add = ({navigation, route}) => {
-    const go = useNavigation()
+const Edit = ({navigation, route}) => {
     const {userToken} = useContext(AuthContext)
     const {address} = useContext(AuthContext)
-    const [value, setValue] = useState("")
-    const [page, setPage] = useState(route.params.addStyle)
-    const [fileType, setFileType] = useState(null)
-    const [fileService, setFileService] = useState(null)
-    const [fileDes, setFileDes] = useState(null)
-    const [fileTour, setFileTour] = useState(null)
-
-    if(page == "destinations"){
-        var [name, setName] = useState("")
-        var [content, setContent] = useState("")
-        var [address1, setAddress1] = useState("")
-        var [operatingTime, setoperatingTime] = useState("")
-        var [price, setPrice] = useState("")
-        var [capacity, setCapacity] = useState("")
-        var [contact, setContact] = useState("")
-        var [map, setMap] = useState("")
-        var [types, setTypes] = useState([])
-        var [checked, setChecked] = useState([])
-        var [services, setServices] = useState([])
-        var [checked1, setChecked1] = useState([])
+    if(route.params.editStyle == "account"){
+        var [value, setValue] = useState(route.params.role)
+    }
+    else if(route.params.editStyle == "type"){
+        var [value, setValue] = useState(route.params.name)
+    }
+    else if(route.params.editStyle == "service"){
+        var [value, setValue] = useState(route.params.name)
+    }
+    else if(route.params.editStyle == "destination"){
+        var [value, setValue] = useState(route.params.destination)
+        var [name, setName] = useState(route.params.destination.name)
+        var [content, setContent] = useState(route.params.destination.content)
+        var [address1, setAddress1] = useState(route.params.destination.address)
+        var [operatingTime, setoperatingTime] = useState(route.params.destination.operatingTime)
+        var [price, setPrice] = useState(route.params.destination.price)
+        var [capacity, setCapacity] = useState(route.params.destination.capacity)
+        var [contact, setContact] = useState(route.params.destination.contact)
+        var [map, setMap] = useState(route.params.destination.map)
         var [image, setImage] = useState([])
+        var [types, setTypes] = useState([])
+        var [checked, setChecked] = useState(value.types)
+        var [services, setServices] = useState([])
+        var [checked1, setChecked1] = useState(value.services)
+        var [number, setNumber] = useState(0)
         var [district, setDistrict] = useState([])
         var [ward, setWard] = useState([])
-        var [value1, setValue1] = useState(null)
-        var [value2, setValue2] = useState(null)
+        var [value1, setValue1] = useState(value.districtId)
+        var [value2, setValue2] = useState(value.wardCode)
         var [isFocus1, setIsFocus1] = useState(false)
         var [isFocus2, setIsFocus2] = useState(false)
 
-        var [number, setNumber] = useState(0)
+        var tt = value.districtId
 
         const findAllType = function(){
             axios.get(`${address}/me/stored/types`, {
@@ -121,11 +121,28 @@ const Add = ({navigation, route}) => {
                 for(var i = 0; i < res.data.length; i++)
                     arr.push({value: res.data[i]._id, label: res.data[i].name, wardList: res.data[i].wards})
                 setDistrict(arr)
+                // var arr2 = []
+                // var check = 0
+                // for(var i = 0; i < district.length; i++){
+                //     if(district[i].value == tt){
+                //         console.log("da vao")
+                //         check = 1
+                //         for(var j = 0; j < district[i].wardList.length; j++)
+                //             arr2.push({value: district[i].wardList[j].code, label: district[i].wardList[j].name})
+                //         break
+                //     }
+                // }
+                // if(check == 1){
+                //     setWard(arr2)
+                //     tt = ""
+                // }
               })
               .catch(function(err){
                 console.log("Err:", err)
               })
+            
         }
+
     
         var handleWard = function(id){
             var arr = []
@@ -139,6 +156,22 @@ const Add = ({navigation, route}) => {
             setWard(arr)
         }
 
+        var handleWard1 = function(){
+            var arr = []
+            for(var i = 0; i < district.length; i++){
+                if(district[i].value == tt){
+                    for(var j = 0; j < district[i].wardList.length; j++)
+                        arr.push({value: district[i].wardList[j].code, label: district[i].wardList[j].name})
+                    break
+                }
+            }
+            setWard(arr)
+        }
+
+
+        useEffect(()=>{
+            findAllAddress()
+        }, [])
         useEffect(()=>{
             findAllType()
         }, [])
@@ -146,18 +179,20 @@ const Add = ({navigation, route}) => {
             findAllService()
         }, [])
         useEffect(()=>{
-            findAllAddress()
-        }, [])
+            handleWard1()
+        }, [district])
+        
     }
-    else if(page == "tours"){
-        var [title, setTitle] = useState("")
-        var [content, setContent] = useState("")
-        var [time, setTime] = useState("")
-        var [price, setPrice] = useState("")
-        var [contact, setContact] = useState("")
+    else if(route.params.editStyle == "tour"){
+        var [value, setValue] = useState(route.params.tour)
+        var [title, setTitle] = useState(route.params.tour.title)
+        var [content, setContent] = useState(route.params.tour.content)
+        var [time, setTime] = useState(route.params.tour.time)
+        var [price, setPrice] = useState(route.params.tour.price)
+        var [contact, setContact] = useState(route.params.tour.contact)
         var [image, setImage] = useState([])
         var [destinations, setDestinations] = useState([])
-        var [checked, setChecked] = useState([])
+        var [checked, setChecked] = useState(value.destinations)
         var [number, setNumber] = useState(0)
 
         const findAllDestination = function(){
@@ -198,8 +233,226 @@ const Add = ({navigation, route}) => {
         useEffect(()=>{
             findAllDestination()
         }, [])
+        
     }
-    
+    const [page, setPage] = useState(route.params.editStyle)
+    const update = async function(){
+        if(value.length == 0 && page != "destination" && page != "tour"){
+            alert("Please enter...")
+            return false
+        }
+        if(page == "account"){
+            axios.put(`${address}/account/update/${route.params._id}`, {
+                role: value.toLowerCase().trim()
+            }, {
+                headers: {Authorization: `Bearer ${userToken.token}`},
+            })
+                .then(function(res){
+                    //console.log(res.data.msg)
+                    axios.get(`${address}/me/stored/accounts`, {
+                        headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
+                    })
+                    .then(function(res){
+                        var arr1 = []
+                        for(var i = 0; i < res.data.accounts.length; i++){
+                            arr1.push(res.data.accounts[i])
+                        }
+                        route.params.rerender(arr1)
+                    })
+                    .catch(function(err){
+                        console.log("Err:", err)
+                    })
+                    navigation.navigate("manageAccount")
+                })
+                .catch(function(err){
+                    console.log("Err:", err)
+            })
+            setValue("")
+            Keyboard.dismiss()
+        }
+        else if(page == "type"){
+            axios.put(`${address}/types/update/${route.params._id}`, {
+                name: value.trim()
+            }, {
+                headers: {Authorization: `Bearer ${userToken.token}`},
+            })
+                .then(function(res){
+                    axios.get(`${address}/me/stored/types`, {
+                        headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
+                    })
+                      .then(function(res){
+                        var arr1 = []
+                        for(var i = 0; i < res.data.types.length; i++){
+                            arr1.push(res.data.types[i])
+                        }
+                        route.params.rerender(arr1)
+                      })
+                      .catch(function(err){
+                        console.log("Err:", err)
+                      })
+                    navigation.navigate("manageType")
+                })
+                .catch(function(err){
+                    console.log("Err:", err)
+            })
+            setValue("")
+            Keyboard.dismiss()
+        }
+        else if(page == "service"){
+            axios.put(`${address}/services/update/${route.params._id}`, {
+                name: value.trim()
+            }, {
+                headers: {Authorization: `Bearer ${userToken.token}`},
+            })
+                .then(function(res){
+                    axios.get(`${address}/me/stored/services`, {
+                        headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
+                    })
+                      .then(function(res){
+                        var arr1 = []
+                        for(var i = 0; i < res.data.services.length; i++){
+                            arr1.push(res.data.services[i])
+                        }
+                        route.params.rerender(arr1)
+                      })
+                      .catch(function(err){
+                        console.log("Err:", err)
+                      })
+                    navigation.navigate("manageService")
+                })
+                .catch(function(err){
+                    console.log("Err:", err)
+            })
+            setValue("")
+            Keyboard.dismiss()
+        }
+        else if(page == "destination"){
+            // axios.put(`${address}/destinations/update/${value._id}`, {
+            //     name: name, 
+            //     content: content, 
+            //     address: address1,
+            //     districtId: value1,
+            //     wardCode: value2,
+            //     operatingTime: operatingTime,
+            //     contact: contact,
+            //     price: price,
+            //     capacity: capacity,
+            //     map: map,
+            //     types: checked,
+            //     services: checked1,
+            //     image: image
+            // }, {
+            //     headers: {Authorization: `Bearer ${userToken.token}`},
+            // })
+            //     .then(function(res){
+            //         //console.log(res.data.msg)
+            //         navigation.navigate("manageDestination")
+            //     })
+            //     .catch(function(err){
+            //         console.log("Err:", err)
+            // })
+            // setValue("")
+            // Keyboard.dismiss()
+            try {
+                console.log(image)
+                const data = new FormData();
+                for(var i = 0; i < image.length; i++)
+                  data.append("image", image[i]);
+                data.append("name", name)
+                data.append("content", content)
+                data.append("address", address1)
+                data.append("districtId", value1)
+                data.append("wardCode", value2)
+                data.append("operatingTime", operatingTime)
+                data.append("contact", contact)
+                data.append("price", price)
+                data.append("capacity", capacity)
+                data.append("map", map)
+                data.append("types", checked)
+                data.append("services", checked1)
+                await fetch(`${address}/destinations/update/${value._id}`, {
+                  method: "PUT",
+                  headers: {
+                    Authorization: `Bearer ${userToken.token}`,
+                  },
+                  body: data,
+                });
+                axios.get(`${address}/me/stored/destinations`, {
+                    headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
+                })
+                .then(function(res){
+                    var arr1 = []
+                    for(var i = 0; i < res.data.destinations.length; i++){
+                        arr1.push(res.data.destinations[i])
+                    }
+                        route.params.rerender(arr1)
+                })
+                .catch(function(err){
+                    console.log("Err:", err)
+                })
+                
+                navigation.navigate("manageDestination")
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        else if(page == "tour"){
+            // axios.put(`${address}/tours/update/${value._id}`, {
+            //     title: title, 
+            //     content: content, 
+            //     time: time,
+            //     contact: contact,
+            //     price: price,
+            //     destinations: checked,
+            // }, {
+            //     headers: {Authorization: `Bearer ${userToken.token}`},
+            // })
+            //     .then(function(res){
+            //         //console.log(res.data.msg)
+            //         navigation.navigate("manageTour")
+            //     })
+            //     .catch(function(err){
+            //         console.log("Err:", err)
+            // })
+            // setValue("")
+            // Keyboard.dismiss()
+            try {
+                console.log(image)
+                const data = new FormData();
+                for(var i = 0; i < image.length; i++)
+                  data.append("image", image[i]);
+                data.append("title", title)
+                data.append("content", content)
+                data.append("time", time)
+                data.append("contact", contact)
+                data.append("price", price)
+                data.append("destinations", checked)
+                await fetch(`${address}/tours/update/${value._id}`, {
+                  method: "PUT",
+                  headers: {
+                    Authorization: `Bearer ${userToken.token}`,
+                  },
+                  body: data,
+                });
+                axios.get(`${address}/me/stored/tours`, {
+                    headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
+                })
+                .then(function(res){
+                    var arr1 = []
+                    for(var i = 0; i < res.data.tours.length; i++){
+                        arr1.push(res.data.tours[i])
+                    }
+                    route.params.rerender(arr1)
+                })
+                .catch(function(err){
+                    console.log("Err:", err)
+                })
+                navigation.navigate("manageTour")
+            } catch (error) {
+                console.log(error);
+            }
+        }
+    }
     const pickImage = async () => {
         // No permissions request is necessary for launching the image library
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -227,289 +480,43 @@ const Add = ({navigation, route}) => {
           setNumber(arr.length)
         }
     };
-
-    const pickFile = async () => {
-        let result = await DocumentPicker.getDocumentAsync({ type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        
-        if (result.type === 'success') {
-            console.log(
-                `URI: ${result.uri}\n` +
-                `Type: ${result.type}\n` +
-                `Name: ${result.name}\n` +
-                `Size: ${result.size}\n`
-            );
-            if(route.params.addStyle == "types")
-                setFileType(result)
-            else if(route.params.addStyle == "services")
-                setFileService(result)
-            else if(route.params.addStyle == "destinations")
-                setFileDes(result)
-            else if(route.params.addStyle == "tours")
-                setFileTour(result)
-        } 
-        else if (result.type === 'cancel') {
-            console.log('User cancelled the file picker.');
-        }
-    };
-
-    const createDes = async function(){
-        try {
-            console.log(image)
-            const data = new FormData();
-            for(var i = 0; i < image.length; i++)
-              data.append("image", image[i]);
-            data.append("name", name)
-            data.append("content", content)
-            data.append("address", address1)
-            data.append("districtId", value1)
-            data.append("wardCode", value2)
-            data.append("operatingTime", operatingTime)
-            data.append("contact", contact)
-            data.append("price", price)
-            data.append("capacity", capacity)
-            data.append("map", map)
-            data.append("types", checked)
-            data.append("services", checked1)
-            await fetch(`${address}/destinations/create`, {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${userToken.token}`,
-              },
-              body: data,
-            });
-            axios.get(`${address}/me/stored/destinations`, {
-                headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
-            })
-            .then(function(res){
-            var arr1 = []
-            for(var i = 0; i < res.data.destinations.length; i++){
-                arr1.push(res.data.destinations[i])
-            }
-                route.params.rerender(arr1)
-            })
-            .catch(function(err){
-                console.log("Err:", err)
-            })
-
-            navigation.navigate("manageDestination")
-        } catch (error) {
-            console.log(error);
-        }
-    }
-    const createTour = async function(){
-        try {
-            console.log(image)
-            const data = new FormData();
-            for(var i = 0; i < image.length; i++)
-              data.append("image", image[i]);
-            data.append("title", title)
-            data.append("content", content)
-            data.append("time", time)
-            data.append("contact", contact)
-            data.append("price", price)
-            data.append("destinations", checked)
-            await fetch(`${address}/tours/create`, {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${userToken.token}`,
-              },
-              body: data,
-            });
-            axios.get(`${address}/me/stored/tours`, {
-                headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
-            })
-            .then(function(res){
-                var arr1 = []
-                for(var i = 0; i < res.data.tours.length; i++){
-                    arr1.push(res.data.tours[i])
-                }
-                route.params.rerender(arr1)
-            })
-            .catch(function(err){
-                console.log("Err:", err)
-            })
-            
-            navigation.navigate("manageTour")
-        } catch (error) {
-            console.log(error);
-        }
-    }
-    const create = function(){
-        if(value.length == 0){
-            alert("Please enter...")
-            return false
-        }
-        axios.post(`${address}/${route.params.addStyle}/create`, {
-            name: value.trim()
-        }, {
-            headers: {Authorization: `Bearer ${userToken.token}`},
-        })
-            .then(function(res){
-                //console.log(res.data.msg)
-                if(route.params.addStyle == "types"){
-                    axios.get(`${address}/me/stored/types`, {
-                        headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
-                    })
-                    .then(function(res){
-                        var arr1 = []
-                        for(var i = 0; i < res.data.types.length; i++){
-                            arr1.push(res.data.types[i])
-                        }
-                        route.params.rerender(arr1)
-                    })
-                    .catch(function(err){
-                        console.log("Err:", err)
-                    })
-                    navigation.navigate("manageType")
-                }
-                    
-                else if(route.params.addStyle == "services"){
-                    axios.get(`${address}/me/stored/services`, {
-                        headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
-                    })
-                      .then(function(res){
-                        var arr1 = []
-                        for(var i = 0; i < res.data.services.length; i++){
-                            arr1.push(res.data.services[i])
-                        }
-                        route.params.rerender(arr1)
-                      })
-                      .catch(function(err){
-                        console.log("Err:", err)
-                      })
-                      navigation.navigate("manageService")
-                }
-                    
-            })
-            .catch(function(err){
-                console.log("Err:", err)
-        })
-        setValue("")
-        Keyboard.dismiss()
-    }
-    const createWithFile = async () => {
-        if(route.params.addStyle == "types"){
-            const formData = new FormData();
-            formData.append('file', {
-            uri: fileType.uri,
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            name: fileType.name,
-            });
-        
-            const response = await fetch(`${address}/types/create`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${userToken.token}`,
-            },
-            body: formData,
-            });
-        
-            navigation.navigate("manageType")
-        }
-        else if(route.params.addStyle == "services"){
-            const formData = new FormData();
-            formData.append('file', {
-            uri: fileService.uri,
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            name: fileService.name,
-            });
-        
-            const response = await fetch(`${address}/services/create`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${userToken.token}`,
-            },
-            body: formData,
-            });
-        
-            navigation.navigate("manageService")
-        }
-        else if(route.params.addStyle == "destinations"){
-            const formData = new FormData();
-            formData.append('file', {
-            uri: fileDes.uri,
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            name: fileDes.name,
-            });
-            formData.append("excel", "yes")
-        
-            const response = await fetch(`${address}/destinations/create/excel`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${userToken.token}`,
-            },
-            body: formData,
-            });
-        
-            navigation.navigate("manageDestination")
-        }
-        else if(route.params.addStyle == "tours"){
-            const formData = new FormData();
-            formData.append('file', {
-            uri: fileTour.uri,
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            name: fileTour.name,
-            });
-            formData.append("excel", "yes")
-        
-            const response = await fetch(`${address}/tours/create/excel`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${userToken.token}`,
-            },
-            body: formData,
-            });
-        
-            navigation.navigate("manageTour")
-        }
-    };
     return (
         
-        <View style={{alignItems: "center", backgroundColor: "#fff", flex: 1}}>
+        <View style={{alignItems: "center", flex: 1, backgroundColor: "#fff"}}>
             <Header navigation={navigation} route={route} />
             {
-            page == "types" ? 
-                <View>
-                    <View style={{margin: 10}}>
-                        <Text style={{fontSize: 20, fontWeight: "bold", textAlign: "center"}}>Create Type</Text>
-                    </View>
-                    <View style={{paddingHorizontal: 10}}>
-                        <Text style={{marginBottom: 10, fontSize: 15, fontWeight: "bold"}}>Name</Text>
-                        <TextInput
-                            value={value} 
-                            placeholder='Enter...' 
-                            style={styles.input}
-                            onChangeText = {(text) => setValue(text)}
-                        >
-                        </TextInput>
-                        <View style={{alignItems: 'flex-end'}}>
-                        <Pressable onPress={create} style={styles.btn}>
-                            <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
-                        </Pressable>
-                        </View>
-                        <View style={{marginTop: 10, flexDirection: "row"}}>
-                            <Text style={{fontSize: 15, fontWeight: "bold"}}>Or upload with File</Text>
-                            <Text 
-                                style={{marginLeft: 5, fontSize: 15, color: "orange"}} 
-                                onPress={() => Linking.openURL('https://docs.google.com/spreadsheets/d/1cL5OHRTcJeASlZVX3LKYGVoLX67IXeIW/edit?usp=sharing&amp;ouid=114759917748435653610&amp;rtpof=true&amp;sd=true')}>
-                                Download sample file
-                            </Text>
-                        </View>
-                        <Pressable style={{marginTop: 10, padding: 10, backgroundColor: "lightgray", width: 70, flexDirection: "row", borderRadius: 5}} onPress={pickFile}>
-                            <Text>Browse</Text>
-                            <Text style={{marginLeft: 20, width: 300}}>{fileType ? `${fileType.name}` : ""}</Text>
-                        </Pressable>
-                        <View style={{alignItems: 'flex-end'}}>
-                        <Pressable onPress={createWithFile} style={styles.btn}>
-                            <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
-                        </Pressable>
-                        </View>
-                    </View>  
+            page == "account" ? 
+                <View style={{}}>
+                <View style={{margin: 10}}>
+                    <Text style={{fontSize: 20, fontWeight: "bold", textAlign: "center"}}>Update Account</Text>
                 </View>
-                : page == "services" ? 
+                <View style={{paddingHorizontal: 10}}>
+                    <Text style={{marginBottom: 10, fontSize: 15, fontWeight: "bold"}}>Role</Text>
+                    <TextInput
+                        value={value} 
+                        placeholder='Enter...' 
+                        style={styles.input}
+                        onChangeText = {(text) => setValue(text)}
+                    >
+                    </TextInput>
+                    <View style={{alignItems: 'flex-end'}}>
+                    <Pressable onPress={update} style={styles.btn}>
+                        <Text style={{color: "#000", textAlign: "center"}}>Update</Text>
+                    </Pressable>
+                    </View>
+                </View>
+                <View>
+                    <Text style={{fontSize: 15, fontWeight: "bold", marginBottom: 10}}>Note:</Text>
+                    <Text>Admin: qtv</Text>
+                    <Text>Collaborator_Destination: ctv1</Text>
+                    <Text>Collaborator_Tour: ctv2</Text>
+                    <Text>Member: tv</Text>
+                </View>
+                </View>
+                : page == "type" ? 
                 <View>
                 <View style={{margin: 10}}>
-                    <Text style={{fontSize: 20, fontWeight: "bold", textAlign: "center"}}>Create Service</Text>
+                    <Text style={{fontSize: 20, fontWeight: "bold", textAlign: "center"}}>Update Type</Text>
                 </View>
                 <View style={{paddingHorizontal: 10}}>
                     <Text style={{marginBottom: 10, fontSize: 15, fontWeight: "bold"}}>Name</Text>
@@ -521,33 +528,37 @@ const Add = ({navigation, route}) => {
                     >
                     </TextInput>
                     <View style={{alignItems: 'flex-end'}}>
-                        <Pressable onPress={create} style={styles.btn}>
-                            <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
-                        </Pressable>
-                    </View>
-                    <View style={{marginTop: 10, flexDirection: "row"}}>
-                        <Text style={{fontSize: 15, fontWeight: "bold"}}>Or upload with File</Text>
-                        <Text 
-                            style={{marginLeft: 5, fontSize: 15, color: "orange"}} 
-                            onPress={() => Linking.openURL('https://docs.google.com/spreadsheets/d/1cL5OHRTcJeASlZVX3LKYGVoLX67IXeIW/edit?usp=sharing&amp;ouid=114759917748435653610&amp;rtpof=true&amp;sd=true')}>
-                            Download sample file
-                        </Text>
-                    </View>
-                    <Pressable style={{marginTop: 10, padding: 10, backgroundColor: "lightgray", width: 70, flexDirection: "row", borderRadius: 5}} onPress={pickFile}>
-                        <Text>Browse</Text>
-                        <Text style={{marginLeft: 20, width: 300}}>{fileService ? `${fileService.name}` : ""}</Text>
+                    <Pressable onPress={update} style={styles.btn}>
+                        <Text style={{color: "#000", textAlign: "center"}}>Update</Text>
                     </Pressable>
+                    </View>
+                </View>
+                </View>
+                : page == "service" ?
+                <View>
+                <View style={{margin: 10}}>
+                    <Text style={{fontSize: 20, fontWeight: "bold", textAlign: "center"}}>Update Service</Text>
+                </View>
+                <View style={{paddingHorizontal: 10}}>
+                    <Text style={{marginBottom: 10, fontSize: 15, fontWeight: "bold"}}>Name</Text>
+                    <TextInput
+                        value={value} 
+                        placeholder='Enter...' 
+                        style={styles.input}
+                        onChangeText = {(text) => setValue(text)}
+                    >
+                    </TextInput>
                     <View style={{alignItems: 'flex-end'}}>
-                    <Pressable onPress={createWithFile} style={styles.btn}>
-                        <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
+                    <Pressable onPress={update} style={styles.btn}>
+                        <Text style={{color: "#000", textAlign: "center"}}>Update</Text>
                     </Pressable>
                     </View>
                 </View>
                 </View>
-                : page == "destinations" ?
+                : page == "destination" ?
                 <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
                 <View style={{margin: 10}}>
-                    <Text style={{fontSize: 20, fontWeight: "bold", textAlign: "center"}}>Create Destination</Text>
+                    <Text style={{fontSize: 20, fontWeight: "bold", textAlign: "center"}}>Update Destination</Text>
                 </View>
                 <View style={{paddingHorizontal: 10}}>
                     <Text style={{marginVertical: 10, fontSize: 15, fontWeight: "bold"}}>Name</Text>
@@ -703,36 +714,19 @@ const Add = ({navigation, route}) => {
                         <Text style={{marginLeft: 20, width: 300}}>{number > 0 ? `Number of files selected: ${number}` : ""}</Text>
                     </Pressable>
                     <View style={{alignItems: 'flex-end'}}>
-                    <Pressable onPress={createDes} style={styles.btn}>
-                        <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
-                    </Pressable>
-                    </View>
-                    <View style={{marginTop: 10, flexDirection: "row"}}>
-                        <Text style={{fontSize: 15, fontWeight: "bold"}}>Or upload with File</Text>
-                        <Text 
-                            style={{marginLeft: 5, fontSize: 15, color: "orange"}} 
-                            onPress={() => Linking.openURL('https://docs.google.com/spreadsheets/d/1-iAZe1aB-tqTvtigK80pGowue84P8O2S/edit?usp=sharing&amp;ouid=114759917748435653610&amp;rtpof=true&amp;sd=true')}>
-                            Download sample file
-                        </Text>
-                    </View>
-                    <Pressable style={{marginTop: 10, padding: 10, backgroundColor: "lightgray", width: 70, flexDirection: "row", borderRadius: 5}} onPress={pickFile}>
-                        <Text>Browse</Text>
-                        <Text style={{marginLeft: 20, width: 300}}>{fileDes ? `${fileDes.name}` : ""}</Text>
-                    </Pressable>
-                    <View style={{alignItems: 'flex-end'}}>
-                    <Pressable onPress={createWithFile} style={styles.btn}>
-                        <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
+                    <Pressable onPress={update} style={styles.btn}>
+                        <Text style={{color: "#000", textAlign: "center"}}>Update</Text>
                     </Pressable>
                     </View>
                 </View>
                 </ScrollView>
-                : page == "tours" ? 
+                : page == "tour" ?
                 <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
                 <View style={{margin: 10}}>
-                    <Text style={{fontSize: 20, fontWeight: "bold", textAlign: "center"}}>Create Tour</Text>
+                    <Text style={{fontSize: 20, fontWeight: "bold", textAlign: "center"}}>Update Tour</Text>
                 </View>
                 <View style={{paddingHorizontal: 10}}>
-                    <Text style={{marginVertical: 10, fontSize: 15, fontWeight: "bold"}}>Title</Text>
+                    <Text style={{marginVertical: 10,fontSize: 15, fontWeight: "bold"}}>Title</Text>
                     <TextInput
                         value={title} 
                         placeholder='Enter...' 
@@ -758,7 +752,7 @@ const Add = ({navigation, route}) => {
                         onChangeText = {(text) => setTime(text)}
                     >
                     </TextInput>
-                    <Text style={{marginVertical: 10,fontSize: 15, fontWeight: "bold"}}>Price</Text>
+                    <Text style={{marginVertical: 10, fontSize: 15, fontWeight: "bold"}}>Price</Text>
                     <TextInput
                         value={price.toString()} 
                         placeholder='Enter...' 
@@ -791,35 +785,18 @@ const Add = ({navigation, route}) => {
                         }
                     </View>
                     <Text style={{marginVertical: 10, fontSize: 15, fontWeight: "bold"}}>Image</Text>
-                    <Pressable style={{padding: 10, backgroundColor: "lightgray", width: 70, flexDirection: "row", borderRadius: 5}} onPress={pickImage}>
+                    <Pressable style={{padding: 10, backgroundColor: "gray", width: 70, flexDirection: "row", borderRadius: 5}} onPress={pickImage}>
                         <Text>Browse</Text>
                         <Text style={{marginLeft: 20, width: 300}}>{number > 0 ? `Number of files selected: ${number}` : ""}</Text>
                     </Pressable>
                     <View style={{alignItems: 'flex-end'}}>
-                    <Pressable onPress={createTour} style={styles.btn}>
-                        <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
-                    </Pressable>
-                    </View>
-                    <View style={{marginTop: 10, flexDirection: "row"}}>
-                        <Text style={{fontSize: 15, fontWeight: "bold"}}>Or upload with File</Text>
-                        <Text 
-                            style={{marginLeft: 5, fontSize: 15, color: "orange"}} 
-                            onPress={() => Linking.openURL('https://docs.google.com/spreadsheets/d/1-rpCYteyRQER0GdJtAZ0dSNT8iCIzYxW/edit?usp=sharing&amp;ouid=114759917748435653610&amp;rtpof=true&amp;sd=true')}>
-                            Download sample file
-                        </Text>
-                    </View>
-                    <Pressable style={{marginTop: 10, padding: 10, backgroundColor: "lightgray", width: 70, flexDirection: "row", borderRadius: 5}} onPress={pickFile}>
-                        <Text>Browse</Text>
-                        <Text style={{marginLeft: 20, width: 300}}>{fileDes ? `${fileDes.name}` : ""}</Text>
-                    </Pressable>
-                    <View style={{alignItems: 'flex-end'}}>
-                    <Pressable onPress={createWithFile} style={styles.btn}>
-                        <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
+                    <Pressable onPress={update} style={styles.btn}>
+                        <Text style={{color: "#000", textAlign: "center"}}>Update</Text>
                     </Pressable>
                     </View>
                 </View>
                 </ScrollView>
-                : <Text>Not found</Text>
+                : <Text>abc</Text>
             }
             
         </View>
@@ -902,4 +879,4 @@ const styles = StyleSheet.create({
 
 
 
-export default Add
+export default Edit

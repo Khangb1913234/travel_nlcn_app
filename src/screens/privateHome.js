@@ -22,10 +22,22 @@ const PrivateHome = ({navigation, route}) => {
     useEffect(()=>{
         getInfo()
     }, [collection])
+
+    const directLink = function(){
+        if(userToken.account.role == "qtv"){
+            navigation.navigate("manageAccount")
+        }
+        else if(userToken.account.role == "ctv1"){
+            navigation.navigate("manageDestination")
+        }
+        else if(userToken.account.role == "ctv2"){
+            navigation.navigate("manageTour")
+        }
+    }
     return (
         <View style={{backgroundColor: "#fff", flex: 1}}>
             <Header navigation={navigation} route={route}/>
-            <Text style={styles.title}>Private Home</Text>
+            <Text style={styles.title}>My Home</Text>
             <View style={styles.body}>
                 <Text style={{fontSize: 15, fontWeight: "bold"}}>Username: {userToken.account.username}</Text>
                 <Text style={{fontSize: 15, fontWeight: "bold"}}>ID: {userToken.account._id}</Text>
@@ -42,9 +54,18 @@ const PrivateHome = ({navigation, route}) => {
                 </View>
                 :<View></View>
                 }
+                <View style={{flexDirection: "row"}}>
+                {
+                    userToken.account.role != "tv"
+                    ?   <TouchableOpacity style={styles.btn} onPress={directLink}>
+                            <Text style={{textAlign: "center"}}>Manage</Text>
+                        </TouchableOpacity>  
+                    :   <></>
+                }
                 <TouchableOpacity style={styles.btn} onPress={logout}>
                     <Text style={{textAlign: "center"}}>Log out</Text>
-                </TouchableOpacity>
+                </TouchableOpacity>   
+                </View>
             </View>
         </View>
     )
@@ -65,6 +86,7 @@ const styles = StyleSheet.create({
     },
     btn: {
         marginTop: 20,
+        marginRight: 10,
         backgroundColor: "pink",
         paddingVertical: 10,
         borderRadius: 5,

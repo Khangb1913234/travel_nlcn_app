@@ -1,9 +1,9 @@
 import { View, Text, StyleSheet, Linking, ScrollView, Pressable, Modal, Alert, Keyboard} from 'react-native'
 import React from 'react'
 import { useContext, useEffect, useState } from 'react';
-import { AuthContext } from '../contexts/auth';
+import { AuthContext } from '../../contexts/auth';
 import axios from 'axios';
-import Header from '../components/header';
+import Header from '../../components/header';
 import { Image } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome'
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons'

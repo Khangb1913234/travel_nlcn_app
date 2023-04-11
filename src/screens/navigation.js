@@ -1,22 +1,20 @@
-import Login from '../screens/login';
-import Register from '../screens/register';
+import Login from './form/login';
+import Register from './form/register';
 import PrivateHome from './privateHome';
-import Destinations from './destinations'
-import DetailDestination from './detailDestination';
-import ManageAccount from './manageAccount';
-import ManageType from './manageType';
-import ManageService from './manageService';
-import ManageApproval from './manageApproval';
-import ManageUnApproval from './manageUnApproval';
-import ManageDestination from './manageDestination';
-import ManageTour from './manageTour';
-import Edit from './edit'
-import Add from './add'
-import Test2 from './test2'
-import Tours from './tour';
-import DetailTour from './detailTour';
+import Destinations from './destination/destinations'
+import DetailDestination from './destination/detailDestination';
+import ManageAccount from './manage/manageAccount';
+import ManageType from './manage/manageType';
+import ManageService from './manage/manageService';
+import ManageApproval from './manage/manageApproval';
+import ManageUnApproval from './manage/manageUnApproval';
+import ManageDestination from './manage/manageDestination';
+import ManageTour from './manage/manageTour';
+import Edit from './form/edit'
+import Add from './form/add'
+import Tours from './tour/tour';
+import DetailTour from './tour/detailTour';
 import HomePage from './homePage'
-import Payment from './payment';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthContext } from '../contexts/auth';
@@ -53,7 +51,6 @@ const Navigation = () => {
           <Stack.Screen name="manageTour" component={ManageTour} />
           <Stack.Screen name="edit" component={Edit} />
           <Stack.Screen name="add" component={Add} />
-          <Stack.Screen name="payment" component={Payment} />
           
           </>
           ) 

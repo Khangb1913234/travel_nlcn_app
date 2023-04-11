@@ -2,26 +2,29 @@ import {StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native
 import React, { useContext } from 'react'
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { AuthContext } from '../contexts/auth';
-import Spinner from 'react-native-loading-spinner-overlay/lib';
-import Header from '../components/header'
-import Icon from 'react-native-vector-icons/Entypo'
+import { AuthContext } from '../../contexts/auth';
+import Spinner from 'react-native-loading-spinner-overlay';
+import Header from '../../components/header';
 
-
-const Login = ({navigation, route}) => {
-    const {login, isLoading, message} = useContext(AuthContext)
+const Register = ({navigation, route}) => {
+    const [email, setEmail] = useState("")
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
-    const [showPassword, setShowPassword] = useState(false);
-    
+    const {register, isLoading} = useContext(AuthContext)
     return (
         <>
         <Header navigation={navigation} route={route}/>
-
         <View style={styles.container}>
-            <Spinner visible={isLoading}/>
-            
-            <Text style={{ fontSize: 35, color: "orange", marginBottom: 20}}>SIGN IN</Text>
+            <Spinner visible={isLoading} />
+            <Text style={{fontSize: 35, color: "orange", marginBottom: 20}}>SIGN UP</Text>
+            <View style={styles.inputView}>
+                <TextInput
+                    style={styles.TextInput}
+                    placeholder="Email..."
+                    placeholderTextColor="#003f5c"
+                    onChangeText={(email) => setEmail(email)}
+                /> 
+            </View> 
             <View style={styles.inputView}>
                 <TextInput
                     style={styles.TextInput}
@@ -35,24 +38,20 @@ const Login = ({navigation, route}) => {
                     style={styles.TextInput}
                     placeholder="Password..."
                     placeholderTextColor="#003f5c"
-                    secureTextEntry={!showPassword}
+                    secureTextEntry={true}
                     onChangeText={(password) => setPassword(password)}
                 /> 
-                <TouchableOpacity onPress={()=>{setShowPassword(!showPassword);}} style={{marginRight: 5}}>
-                    <Text>{showPassword ? <Icon name="eye" size={20}></Icon> :  <Icon name="eye-with-line" size={15}></Icon>}</Text>
-                </TouchableOpacity>
             </View>
             <TouchableOpacity 
                 style={styles.loginBtn} 
-                onPress={()=>{login(username, password, navigation)}}
+                onPress={()=>{register(email, username, password, navigation)}}
             >
-                <Text style={styles.loginText}>SIGN IN</Text> 
+                <Text style={styles.loginText}>SIGN UP</Text> 
             </TouchableOpacity>
-            <Text style={{marginTop: 20, color: "red"}}>{message}</Text>
-            <View style={{marginTop: 20, flexDirection: "row"}}>  
-                <Text style={{marginRight: 10, fontSize: 15}}>New to ? </Text>
-                <TouchableOpacity style={{}} onPress={()=>navigation.navigate("register")}>
-                    <Text style={{color: "orange", fontSize: 15}}>Sign up</Text> 
+            <View style={{marginTop: 50, flexDirection: "row"}}>
+                <Text style={{marginRight: 10, fontSize: 15}}>Already have an account ? </Text>
+                <TouchableOpacity style={{}} onPress={()=>navigation.navigate("login")}>
+                    <Text style={{color: "orange", fontSize: 15}}>Sign in</Text> 
                 </TouchableOpacity>
             </View>
         </View>
@@ -74,12 +73,11 @@ const styles = StyleSheet.create({
         height: 45,
         marginBottom: 20,
         alignItems: "center",
-        flexDirection: "row"
     },
     TextInput: {
         height: 50,
         flex: 1,
-        padding: 10,
+        padding: 5,
         marginLeft: 20,
     },
     loginBtn:{
@@ -93,4 +91,4 @@ const styles = StyleSheet.create({
     }
   });
 
-export default Login
+export default Register

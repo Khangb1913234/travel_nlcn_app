@@ -3,6 +3,7 @@ import React, { useContext, useState } from 'react'
 import styles from "./style"
 import { AuthContext } from '../../contexts/auth'
 import Icon from 'react-native-vector-icons/AntDesign'
+import Icon2 from 'react-native-vector-icons/Entypo'
 import { TextInput } from 'react-native-paper'
 import { Searchbar } from 'react-native-paper';
 import { useRoute } from '@react-navigation/native';
@@ -21,17 +22,6 @@ const Header = (props) => {
     if(state.name == "tour")
       props.reset()
     props.navigation.navigate("tour")
-  }
-  const directLink = function(){
-    if(userToken.account.role == "qtv"){
-      props.navigation.navigate("manageAccount")
-    }
-    else if(userToken.account.role == "ctv1"){
-      props.navigation.navigate("manageDestination")
-    }
-    else if(userToken.account.role == "ctv2"){
-      props.navigation.navigate("manageTour")
-    }
   }
   return (
     <View>
@@ -55,14 +45,23 @@ const Header = (props) => {
         >
           <Text style={styles.textStyle}>Tour</Text>
         </Pressable>
-        <Pressable style={styles.info} onPress={()=>{setShow(!show)}}>
-          <Text style={{fontWeight: "bold", paddingHorizontal: 10, color: "orange", fontSize: 15, textAlign: "right"}}>
-            {Object.keys(userToken).length === 0 ? "" : userToken.account.username}
-            <Icon name="caretdown" size={15} color="orange" />
-          </Text>
-        </Pressable>
+        {
+          Object.keys(userToken).length === 0 
+          ? <Pressable style={styles.info} onPress={()=>{setShow(false); props.navigation.navigate("login")}}>
+              <Text style={{fontWeight: "bold", paddingHorizontal: 10, color: "orange", fontSize: 15, textAlign: "right"}}>
+                Sign in/Sign up
+              </Text>
+            </Pressable>
+          : <Pressable style={styles.info} onPress={()=>{setShow(false); props.navigation.navigate("private")}}>
+              <Text style={{fontWeight: "bold", paddingHorizontal: 10, color: "orange", fontSize: 15, textAlign: "right"}}>
+                <Icon2 name="home" size={18} color="orange" />
+                {userToken.account.username}
+              </Text>
+            </Pressable>
+        }
+        
       </View>
-      { 
+      {/* { 
         show ?
           Object.keys(userToken).length === 0 ? 
             <View style={{backgroundColor: "white"}}>
@@ -100,7 +99,7 @@ const Header = (props) => {
             </View>
             
         : <></>
-      }
+      } */}
     </View>
   )
 }
