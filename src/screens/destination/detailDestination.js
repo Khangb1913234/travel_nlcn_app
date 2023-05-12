@@ -420,7 +420,7 @@ const DetailDestination = ({navigation, route}) => {
                       multiline={true}
                       numberOfLines={4}
                       value={review} 
-                      placeholder='Enter...' 
+                      placeholder='Your feeling...' 
                       style={styles.inputArea}
                       onChangeText = {(text) => setReview(text)}
                   >

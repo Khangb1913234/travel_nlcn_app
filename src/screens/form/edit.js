@@ -785,7 +785,7 @@ const Edit = ({navigation, route}) => {
                         }
                     </View>
                     <Text style={{marginVertical: 10, fontSize: 15, fontWeight: "bold"}}>Image</Text>
-                    <Pressable style={{padding: 10, backgroundColor: "gray", width: 70, flexDirection: "row", borderRadius: 5}} onPress={pickImage}>
+                    <Pressable style={{padding: 10, backgroundColor: "lightgray", width: 70, flexDirection: "row", borderRadius: 5}} onPress={pickImage}>
                         <Text>Browse</Text>
                         <Text style={{marginLeft: 20, width: 300}}>{number > 0 ? `Number of files selected: ${number}` : ""}</Text>
                     </Pressable>

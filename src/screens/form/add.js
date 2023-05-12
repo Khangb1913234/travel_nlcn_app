@@ -254,10 +254,13 @@ const Add = ({navigation, route}) => {
 
     const createDes = async function(){
         try {
-            console.log(image)
             const data = new FormData();
             for(var i = 0; i < image.length; i++)
-              data.append("image", image[i]);
+              data.append("image", image[i])
+            if(!name || !content || !address1 || !value1 || !value2 || !operatingTime || !contact || !price || !capacity || !map){
+                alert("Please enter full information...")
+                return false
+            }
             data.append("name", name)
             data.append("content", content)
             data.append("address", address1)
@@ -298,7 +301,10 @@ const Add = ({navigation, route}) => {
     }
     const createTour = async function(){
         try {
-            console.log(image)
+            if(!title || !content || !time || !contact || !price){
+                alert("Please enter full information...")
+                return false
+            }
             const data = new FormData();
             for(var i = 0; i < image.length; i++)
               data.append("image", image[i]);
@@ -391,45 +397,72 @@ const Add = ({navigation, route}) => {
         if(route.params.addStyle == "types"){
             const formData = new FormData();
             formData.append('file', {
-            uri: fileType.uri,
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            name: fileType.name,
+                uri: fileType.uri,
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                name: fileType.name,
             });
         
             const response = await fetch(`${address}/types/create`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${userToken.token}`,
-            },
-            body: formData,
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${userToken.token}`,
+                },
+                body: formData,
             });
+            axios.get(`${address}/me/stored/types`, {
+                headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
+            })
+            .then(function(res){
+                var arr1 = []
+                for(var i = 0; i < res.data.types.length; i++){
+                    arr1.push(res.data.types[i])
+                }
+                route.params.rerender(arr1)
+            })
+            .catch(function(err){
+                console.log("Err:", err)
+            })
         
             navigation.navigate("manageType")
         }
         else if(route.params.addStyle == "services"){
             const formData = new FormData();
             formData.append('file', {
-            uri: fileService.uri,
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            name: fileService.name,
+                uri: fileService.uri,
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                name: fileService.name,
             });
         
             const response = await fetch(`${address}/services/create`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${userToken.token}`,
-            },
-            body: formData,
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${userToken.token}`,
+                },
+                body: formData,
             });
+
+            axios.get(`${address}/me/stored/services`, {
+                headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
+            })
+            .then(function(res){
+                var arr1 = []
+                for(var i = 0; i < res.data.services.length; i++){
+                    arr1.push(res.data.services[i])
+                }
+                route.params.rerender(arr1)
+            })
+            .catch(function(err){
+                console.log("Err:", err)
+            })
         
             navigation.navigate("manageService")
         }
         else if(route.params.addStyle == "destinations"){
             const formData = new FormData();
             formData.append('file', {
-            uri: fileDes.uri,
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            name: fileDes.name,
+                uri: fileDes.uri,
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                name: fileDes.name,
             });
             formData.append("excel", "yes")
         
@@ -440,6 +473,20 @@ const Add = ({navigation, route}) => {
             },
             body: formData,
             });
+
+            axios.get(`${address}/me/stored/destinations`, {
+                headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
+            })
+            .then(function(res){
+            var arr1 = []
+            for(var i = 0; i < res.data.destinations.length; i++){
+                arr1.push(res.data.destinations[i])
+            }
+                route.params.rerender(arr1)
+            })
+            .catch(function(err){
+                console.log("Err:", err)
+            })
         
             navigation.navigate("manageDestination")
         }
@@ -459,6 +506,20 @@ const Add = ({navigation, route}) => {
             },
             body: formData,
             });
+
+            axios.get(`${address}/me/stored/tours`, {
+                headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
+            })
+            .then(function(res){
+                var arr1 = []
+                for(var i = 0; i < res.data.tours.length; i++){
+                    arr1.push(res.data.tours[i])
+                }
+                route.params.rerender(arr1)
+            })
+            .catch(function(err){
+                console.log("Err:", err)
+            })
         
             navigation.navigate("manageTour")
         }
@@ -482,11 +543,6 @@ const Add = ({navigation, route}) => {
                             onChangeText = {(text) => setValue(text)}
                         >
                         </TextInput>
-                        <View style={{alignItems: 'flex-end'}}>
-                        <Pressable onPress={create} style={styles.btn}>
-                            <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
-                        </Pressable>
-                        </View>
                         <View style={{marginTop: 10, flexDirection: "row"}}>
                             <Text style={{fontSize: 15, fontWeight: "bold"}}>Or upload with File</Text>
                             <Text 
@@ -500,9 +556,14 @@ const Add = ({navigation, route}) => {
                             <Text style={{marginLeft: 20, width: 300}}>{fileType ? `${fileType.name}` : ""}</Text>
                         </Pressable>
                         <View style={{alignItems: 'flex-end'}}>
-                        <Pressable onPress={createWithFile} style={styles.btn}>
+                        {fileType
+                        ?<Pressable onPress={createWithFile} style={styles.btn}>
                             <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
                         </Pressable>
+                        :<Pressable onPress={create} style={styles.btn}>
+                            <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
+                        </Pressable>
+                        }
                         </View>
                     </View>  
                 </View>
@@ -520,11 +581,6 @@ const Add = ({navigation, route}) => {
                         onChangeText = {(text) => setValue(text)}
                     >
                     </TextInput>
-                    <View style={{alignItems: 'flex-end'}}>
-                        <Pressable onPress={create} style={styles.btn}>
-                            <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
-                        </Pressable>
-                    </View>
                     <View style={{marginTop: 10, flexDirection: "row"}}>
                         <Text style={{fontSize: 15, fontWeight: "bold"}}>Or upload with File</Text>
                         <Text 
@@ -538,9 +594,14 @@ const Add = ({navigation, route}) => {
                         <Text style={{marginLeft: 20, width: 300}}>{fileService ? `${fileService.name}` : ""}</Text>
                     </Pressable>
                     <View style={{alignItems: 'flex-end'}}>
-                    <Pressable onPress={createWithFile} style={styles.btn}>
-                        <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
-                    </Pressable>
+                    {fileService
+                        ?<Pressable onPress={createWithFile} style={styles.btn}>
+                            <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
+                        </Pressable>
+                        :<Pressable onPress={create} style={styles.btn}>
+                            <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
+                        </Pressable>
+                    }
                     </View>
                 </View>
                 </View>
@@ -556,6 +617,7 @@ const Add = ({navigation, route}) => {
                         placeholder='Enter...' 
                         style={styles.input}
                         onChangeText = {(text) => setName(text)}
+                        required
                     >
                     </TextInput>
                     <Text style={{marginVertical: 10, fontSize: 15, fontWeight: "bold"}}>Content</Text>
@@ -702,11 +764,6 @@ const Add = ({navigation, route}) => {
                         <Text>Browse</Text>
                         <Text style={{marginLeft: 20, width: 300}}>{number > 0 ? `Number of files selected: ${number}` : ""}</Text>
                     </Pressable>
-                    <View style={{alignItems: 'flex-end'}}>
-                    <Pressable onPress={createDes} style={styles.btn}>
-                        <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
-                    </Pressable>
-                    </View>
                     <View style={{marginTop: 10, flexDirection: "row"}}>
                         <Text style={{fontSize: 15, fontWeight: "bold"}}>Or upload with File</Text>
                         <Text 
@@ -720,9 +777,15 @@ const Add = ({navigation, route}) => {
                         <Text style={{marginLeft: 20, width: 300}}>{fileDes ? `${fileDes.name}` : ""}</Text>
                     </Pressable>
                     <View style={{alignItems: 'flex-end'}}>
-                    <Pressable onPress={createWithFile} style={styles.btn}>
+                    {fileDes
+                    ?<Pressable onPress={createWithFile} style={styles.btn}>
                         <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
                     </Pressable>
+                    :<Pressable onPress={createDes} style={styles.btn}>
+                        <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
+                    </Pressable>
+                    }
+                    
                     </View>
                 </View>
                 </ScrollView>
@@ -795,11 +858,6 @@ const Add = ({navigation, route}) => {
                         <Text>Browse</Text>
                         <Text style={{marginLeft: 20, width: 300}}>{number > 0 ? `Number of files selected: ${number}` : ""}</Text>
                     </Pressable>
-                    <View style={{alignItems: 'flex-end'}}>
-                    <Pressable onPress={createTour} style={styles.btn}>
-                        <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
-                    </Pressable>
-                    </View>
                     <View style={{marginTop: 10, flexDirection: "row"}}>
                         <Text style={{fontSize: 15, fontWeight: "bold"}}>Or upload with File</Text>
                         <Text 
@@ -813,9 +871,14 @@ const Add = ({navigation, route}) => {
                         <Text style={{marginLeft: 20, width: 300}}>{fileDes ? `${fileDes.name}` : ""}</Text>
                     </Pressable>
                     <View style={{alignItems: 'flex-end'}}>
-                    <Pressable onPress={createWithFile} style={styles.btn}>
+                    {fileTour
+                    ?<Pressable onPress={createWithFile} style={styles.btn}>
                         <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
                     </Pressable>
+                    :<Pressable onPress={createTour} style={styles.btn}>
+                        <Text style={{color: "#000", textAlign: "center"}}>Create</Text>
+                    </Pressable>
+                    }
                     </View>
                 </View>
                 </ScrollView>

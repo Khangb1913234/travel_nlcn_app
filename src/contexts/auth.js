@@ -3,8 +3,8 @@ import axios from 'axios';
 import React, {createContext, useEffect, useState} from 'react';
 export const AuthContext = createContext();
 
-//const IP = "http://10.13.144.87:5000"
-const IP = "http://192.168.1.3:5000"
+// const IP = "http://10.3.55.104:5000"
+const IP = "http://192.168.83.155:5000"
 // const IP = "http://192.168.2.53:5000"
 // const IP = "http://192.168.52.155:5000"
 

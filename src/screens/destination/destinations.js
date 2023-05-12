@@ -13,12 +13,6 @@ import Checkbox from 'expo-checkbox';
 
 // const address = "http://192.168.1.12:5000"
 const Destinations = ({navigation, route}) => {
-    // if(route._id){
-    //     console.log("Co id")
-    // }
-    // else{
-    //     console.log("Ko co id")
-    // }
     const {userToken} = useContext(AuthContext)
     const {address} = useContext(AuthContext)
     const [destinations, setDestiantions] = useState([])

@@ -1,12 +1,21 @@
-import { View, Text, Pressable, Alert, ScrollView } from 'react-native'
+import { View, Text, Pressable, Alert, ScrollView, Dimensions } from 'react-native'
 import Header from '../../components/header'
 import axios from 'axios'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useLayoutEffect, useState } from 'react'
 import { AuthContext } from '../../contexts/auth'
 import Icon from 'react-native-vector-icons/FontAwesome'
 import Icon2 from 'react-native-vector-icons/AntDesign'
 import Checkbox from 'expo-checkbox';
 import { useRoute } from '@react-navigation/native';
+import {
+    LineChart,
+    BarChart,
+    PieChart,
+    ProgressChart,
+    ContributionGraph,
+    StackedBarChart
+  } from "react-native-chart-kit";
+import moment from 'moment';
 
 // const address = "http://192.168.1.12:5000"
 const ManageAccount = ({navigation, route}) => {
@@ -16,6 +25,9 @@ const ManageAccount = ({navigation, route}) => {
     const [accounts, setAccounts] = useState([])
     const [checked, setChecked] = useState([])
     const [isSelectedAll, setSelectionAll] = useState(false)
+    const [statistic, setStatistic] = useState([])
+    const [date, setDate] = useState(["05-05-2023"])
+    const [total, setTotal] = useState([4])
     const findAllAccount = function(){
         axios.get(`${address}/me/stored/accounts`, {
             headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
@@ -30,6 +42,25 @@ const ManageAccount = ({navigation, route}) => {
           .catch(function(err){
             console.log("Err:", err)
           })
+    }
+    const statisticNewAccount = ()=>{
+        axios.get(`${address}/account/statistic`, {
+            headers: Object.keys(userToken).length ? {Authorization: `Bearer ${userToken.token}`} : {Authorization: ``},
+        })
+        .then(function(res){
+            setStatistic(res.data.result)
+            var arr1 = []
+            var arr2 = []
+            for(var i = 0; i < res.data.result.length; i++){
+                arr1.push(res.data.result[i]._id.slice(0, 5))
+                arr2.push(res.data.result[i].total)
+            }
+            setDate(arr1)
+            setTotal(arr2)
+        })
+        .catch(function(err){
+          console.log("Err", err)
+        })
     }
 
     const deleteAccount = function(data){
@@ -135,9 +166,18 @@ const ManageAccount = ({navigation, route}) => {
         }
     }
 
+    //console.log(statistic)
+    
+
     useEffect(()=>{
         findAllAccount()
     }, [])
+
+    useLayoutEffect(()=>{
+        statisticNewAccount()
+    }, [])
+
+
     return (
         <View style={{backgroundColor: "#fff", flex: 1}}>
             <Header navigation={navigation} route={route} />
@@ -208,7 +248,47 @@ const ManageAccount = ({navigation, route}) => {
                             </View>
                 })
             }
+                <View>
+                    <Text style={{margin: 10, fontSize: 20, fontWeight: "bold"}}>Statistics of new members</Text>
+                    <LineChart
+                        data={{
+                        labels: date,
+                        datasets: [
+                            {
+                                data: total,
+                                strokeWidth: 5 // optional
+                            }
+                        ]
+                        }}
+                        width={Dimensions.get("window").width-20} // from react-native
+                        height={220}
+                        yAxisInterval={1} // optional, defaults to 1
+                        fromZero
+                        chartConfig={{
+                        backgroundColor: "#e26a00",
+                        backgroundGradientFrom: "green",
+                        backgroundGradientTo: "green",
+                        decimalPlaces: 0, // optional, defaults to 2dp
+                        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                        labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                        style: {
+                            borderRadius: 16,
+                        },
+                        propsForDots: {
+                            r: "6",
+                            strokeWidth: "5",
+                            stroke: "#ffa726"
+                        }
+                        }}
+                        style={{
+                            marginVertical: 8,
+                            borderRadius: 16,
+                            marginLeft: 10
+                        }}
+                    />
+                </View>
             </ScrollView>
+            
         </View>
     )
 }
